@@ -5,7 +5,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS-IS" BASIS,
@@ -15,12 +15,14 @@
 
 package com.google.testing.pogen.generator.test.java;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 
 /**
  * A utility class to convert various names to adapt for Java naming rule.
- *
+ * 
  * @author Kazunori Sakamoto
  */
 public class NameConverter {
@@ -29,12 +31,11 @@ public class NameConverter {
    */
   private static final char REPLACE = '_';
 
-  private NameConverter() {
-  }
+  private NameConverter() {}
 
   /**
    * Converts the specified file name to a Java class name.
-   *
+   * 
    * @param fileName the file name to be converted
    * @return the Java class name converted from the specified file name
    */
@@ -44,14 +45,14 @@ public class NameConverter {
     StringBuilder result = new StringBuilder();
     String[] strings = getJavaIdentifier(fileName).split("" + REPLACE);
     for (String string : strings) {
-      result.append(StringUtil.capitalize(string));
+      result.append(StringUtils.capitalize(string));
     }
     return result.toString();
   }
 
   /**
    * Converts the specified string to a proper Java identifier.
-   *
+   * 
    * @param str the string to be converted
    * @return the Java identifier converted from the specified string
    */

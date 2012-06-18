@@ -5,7 +5,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS-IS" BASIS,
@@ -14,6 +14,8 @@
 // limitations under the License.
 
 package com.google.testing.pogen.generator.test.java;
+
+import org.apache.commons.lang.StringUtils;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -24,9 +26,9 @@ import com.google.testing.pogen.parser.template.TemplateInfo;
 import com.google.testing.pogen.parser.template.VariableInfo;
 
 /**
- * A class to generate skeleton test code designed by PageObject pattern for
- * Selenium2 (WebDriver) from the specified {@link TemplateInfo} instance.
- *
+ * A class to generate skeleton test code designed by PageObject pattern for Selenium2 (WebDriver)
+ * from the specified {@link TemplateInfo} instance.
+ * 
  * @author Kazunori Sakamoto
  */
 public class TestCodeGenerator {
@@ -57,8 +59,7 @@ public class TestCodeGenerator {
   }
 
   /**
-   * Constructs an instance with the specified indent and the specified new-line
-   * strings.
+   * Constructs an instance with the specified indent and the specified new-line strings.
    */
   public TestCodeGenerator(String indent, String newLine) {
     this.indent = indent;
@@ -66,11 +67,11 @@ public class TestCodeGenerator {
   }
 
   /**
-   * Generates skeleton test code with getter methods for html elements, texts
-   * and attributes to retrieve values of variables from Selenium2.
-   *
-   * @param templateInfo the {@link TemplateInfo} of the template whose skeleton
-   *        test code we want to generate
+   * Generates skeleton test code with getter methods for html elements, texts and attributes to
+   * retrieve values of variables from Selenium2.
+   * 
+   * @param templateInfo the {@link TemplateInfo} of the template whose skeleton test code we want
+   *        to generate
    * @param packageName the package name to generate skeleton test code
    * @param className the class name to generate skeleton test code
    * @return the generated skeleton test code
@@ -116,15 +117,14 @@ public class TestCodeGenerator {
   }
 
   /**
-   * Updates existing test code with getter methods for html elements, texts and
-   * attributes to retrieve the values of the variables from Selenium2.
-   *
-   * @param templateInfo the {@link TemplateInfo} of the template whose skeleton
-   *        test code we want to generate
+   * Updates existing test code with getter methods for html elements, texts and attributes to
+   * retrieve the values of the variables from Selenium2.
+   * 
+   * @param templateInfo the {@link TemplateInfo} of the template whose skeleton test code we want
+   *        to generate
    * @param code the existing test code
    * @return the updated skeleton test code
-   * @throws PageObjectUpdateException if the existing test code doesn't have
-   *         generated code
+   * @throws PageObjectUpdateException if the existing test code doesn't have generated code
    */
   public String update(TemplateInfo templateInfo, String code) throws PageObjectUpdateException {
     Preconditions.checkNotNull(templateInfo);
@@ -144,14 +144,12 @@ public class TestCodeGenerator {
   }
 
   /**
-   * Appends the body of skeleton test code, that is, only html element fields
-   * and getter methods to retrieve the values of the variables into the given
-   * string builder.
-   *
-   * @param builder {@link StringBuilder} the generated test code will be
-   *        appended to
-   * @param templateInfo the {@link TemplateInfo} of the template whose skeleton
-   *        test code we want to generate
+   * Appends the body of skeleton test code, that is, only html element fields and getter methods to
+   * retrieve the values of the variables into the given string builder.
+   * 
+   * @param builder {@link StringBuilder} the generated test code will be appended to
+   * @param templateInfo the {@link TemplateInfo} of the template whose skeleton test code we want
+   *        to generate
    */
   private void appendFieldsAndGetters(StringBuilder builder, TemplateInfo templateInfo) {
     // Create new StringBuilder to separate methods group from fields group such
@@ -192,18 +190,14 @@ public class TestCodeGenerator {
   }
 
   /**
-   * Appends a getter method and also a field if needed for the html element
-   * which contains the variable specified by the name into the given string
-   * builder.
-   *
-   * @param fieldBuilder {@link StringBuilder} the generated field will be
-   *        appended to
-   * @param methodBuilder {@link StringBuilder} the generated method will be
-   *        appended to
+   * Appends a getter method and also a field if needed for the html element which contains the
+   * variable specified by the name into the given string builder.
+   * 
+   * @param fieldBuilder {@link StringBuilder} the generated field will be appended to
+   * @param methodBuilder {@link StringBuilder} the generated method will be appended to
    * @param variableName the variable name
    * @param id the id value assigned to the field
-   * @param isRepeated the boolean whether the specified html tag appears in a
-   *        repeated part
+   * @param isRepeated the boolean whether the specified html tag appears in a repeated part
    */
   private void appendElementGetter(StringBuilder fieldBuilder, StringBuilder methodBuilder,
       String variableName, String id, boolean isRepeated) {
@@ -216,15 +210,13 @@ public class TestCodeGenerator {
   }
 
   /**
-   * Appends a getter method for the text of html element which contains the
-   * variable specified by the name into the given string builder.
-   *
-   * @param methodBuilder {@link StringBuilder} the generated method will be
-   *        appended to
+   * Appends a getter method for the text of html element which contains the variable specified by
+   * the name into the given string builder.
+   * 
+   * @param methodBuilder {@link StringBuilder} the generated method will be appended to
    * @param variableName the variable name
    * @param id the id value assigned to the field
-   * @param isRepeated the boolean whether the specified html tag appears in a
-   *        repeated part
+   * @param isRepeated the boolean whether the specified html tag appears in a repeated part
    */
   private void appendTextGetter(StringBuilder methodBuilder, String variableName, String id,
       boolean isRepeated) {
@@ -236,36 +228,32 @@ public class TestCodeGenerator {
   }
 
   /**
-   * Appends a getter method for the attribute of html element which contains
-   * the variable specified by the name into the given string builder.
-   *
-   * @param methodBuilder {@link StringBuilder} the generated method will be
-   *        appended to
+   * Appends a getter method for the attribute of html element which contains the variable specified
+   * by the name into the given string builder.
+   * 
+   * @param methodBuilder {@link StringBuilder} the generated method will be appended to
    * @param variableName the variable name
-   * @param attributeName the name of the attribute which contains template
-   *        variables
+   * @param attributeName the name of the attribute which contains template variables
    * @param id the id value assigned to the field
-   * @param isRepeated the boolean whether the specified html tag appears in a
-   *        repeated part
+   * @param isRepeated the boolean whether the specified html tag appears in a repeated part
    */
   private void appendAttributeGetter(StringBuilder methodBuilder, String variableName,
       String attributeName, String id, boolean isRepeated) {
     if (!isRepeated) {
       appendGetter(methodBuilder, variableName, ".getAttribute(\"" + attributeName + "\")",
-          "String", StringUtil.capitalize(attributeName) + "AttributeFor");
+          "String", StringUtils.capitalize(attributeName) + "AttributeFor");
     } else {
       appendListGetter(methodBuilder, variableName, ".getAttribute(\"" + attributeName + "\")",
-          "String", StringUtil.capitalize(attributeName) + "AttributesFor", id);
+          "String", StringUtils.capitalize(attributeName) + "AttributesFor", id);
     }
   }
 
   /**
-   * Appends a private field for accessing the html element which has the
-   * specified id value and contains the variable specified by the name with
-   * {@literal @FindBy(how = How.ID, ...)} into the given string builder.
-   *
-   * @param builder {@link StringBuilder} the generated test code will be
-   *        appended to
+   * Appends a private field for accessing the html element which has the specified id value and
+   * contains the variable specified by the name with {@literal @FindBy(how = How.ID, ...)} into the
+   * given string builder.
+   * 
+   * @param builder {@link StringBuilder} the generated test code will be appended to
    * @param variableName the variable name
    * @param id the id value assigned to the field
    */
@@ -277,17 +265,14 @@ public class TestCodeGenerator {
   }
 
   /**
-   * Appends a getter method for the variable specified by the name or the
-   * result of invoking the method described by the given prefix on the variable
-   * into the given string builder.
-   *
-   * @param builder {@link StringBuilder} the generated test code will be
-   *        appended to
+   * Appends a getter method for the variable specified by the name or the result of invoking the
+   * method described by the given prefix on the variable into the given string builder.
+   * 
+   * @param builder {@link StringBuilder} the generated test code will be appended to
    * @param variableName the variable name
-   * @param elementSuffixForInvoking the suffix of the {@code WebElement}
-   *        variable that specifies a method name with a dot to invoke it, e.g.
-   *        {@literal".getText()"}, or an empty string to access the variable
-   *        directly.
+   * @param elementSuffixForInvoking the suffix of the {@code WebElement} variable that specifies a
+   *        method name with a dot to invoke it, e.g. {@literal".getText()"}, or an empty string to
+   *        access the variable directly.
    * @param returnType the return type of the generated getter method
    * @param methodNamePrefix the name prefix of the generated method
    */
@@ -299,24 +284,22 @@ public class TestCodeGenerator {
         builder,
         1,
         String.format("public %s get%s%s() {", returnType, methodNamePrefix,
-            StringUtil.capitalize(variableName)));
+            StringUtils.capitalize(variableName)));
     appendLine(builder, 2, String.format("return %s%s;", variableName, elementSuffixForInvoking));
     appendLine(builder, 1, "}");
   }
 
   /**
-   * Appends a getter method for the list of the variables specified by the name
-   * or the result of invoking the method described by the given prefix on the
-   * variable. The generated getter method is used for repeated part in
-   * templates such as "{foreach $x in $xs}{@literal <div>$x</div>}{/foreach}"
-   *
-   * @param builder {@link StringBuilder} the generated test code will be
-   *        appended to
+   * Appends a getter method for the list of the variables specified by the name or the result of
+   * invoking the method described by the given prefix on the variable. The generated getter method
+   * is used for repeated part in templates such as "{foreach $x in $xs}{@literal <div>$x</div>}
+   * {/foreach}"
+   * 
+   * @param builder {@link StringBuilder} the generated test code will be appended to
    * @param variableName the variable name
-   * @param elementSuffixForInvoking the suffix of the {@code WebElement}
-   *        variable that specifies a method name with a dot to invoke it, e.g.
-   *        {@literal".getText()"}, or an empty string to access the variable
-   *        directly.
+   * @param elementSuffixForInvoking the suffix of the {@code WebElement} variable that specifies a
+   *        method name with a dot to invoke it, e.g. {@literal".getText()"}, or an empty string to
+   *        access the variable directly.
    * @param returnType the return type of the generated getter method
    * @param methodNamePrefix the name prefix of the generated method
    * @param id the id value assigned to the field
@@ -329,7 +312,7 @@ public class TestCodeGenerator {
         builder,
         1,
         String.format("public List<%s> get%s%s() {", returnType, methodNamePrefix,
-            StringUtil.capitalize(variableName)));
+            StringUtils.capitalize(variableName)));
     appendLine(builder, 2,
         String.format("List<%s> result = new ArrayList<%s>();", returnType, returnType));
     appendLine(builder, 2,
@@ -341,13 +324,11 @@ public class TestCodeGenerator {
   }
 
   /**
-   * Converts the specified number to a string. Results an empty string if the
-   * number is 1.
-   *
+   * Converts the specified number to a string. Results an empty string if the number is 1.
+   * 
    * @param number the number to be converted
-   *
-   * @return an empty string if the specified number is 1, otherwise prefix +
-   *         number
+   * 
+   * @return an empty string if the specified number is 1, otherwise prefix + number
    */
   private String convertToString(int number) {
     return number == 1 ? "" : String.valueOf(number);
@@ -355,7 +336,7 @@ public class TestCodeGenerator {
 
   /**
    * Appends a new-line character into the specified builder.
-   *
+   * 
    * @param builder the string builder to be appended a new-line character
    */
   private void appendLine(StringBuilder builder) {
@@ -363,12 +344,11 @@ public class TestCodeGenerator {
   }
 
   /**
-   * Appends the specified line with the specified number of indent string and a
-   * new-line character into the specified builder.
-   *
+   * Appends the specified line with the specified number of indent string and a new-line character
+   * into the specified builder.
+   * 
    * @param builder the string builder to be appended strings
-   * @param indentCount the number of indent string to be appended at the
-   *        beginning of the line
+   * @param indentCount the number of indent string to be appended at the beginning of the line
    * @param line the line string to be be appended into the builder
    */
   private void appendLine(StringBuilder builder, int indentCount, String line) {

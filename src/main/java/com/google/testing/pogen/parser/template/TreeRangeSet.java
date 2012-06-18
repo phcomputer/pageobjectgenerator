@@ -5,7 +5,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS-IS" BASIS,
@@ -17,7 +17,6 @@ package com.google.testing.pogen.parser.template;
 
 public class TreeRangeSet<T extends Comparable<T>> extends RangeSet<T> {
   public static <T extends Comparable<T>> RangeSet<T> create() {
-    // TODO: Auto-generated method stub
-    return null;
+    return new RangeSet<T>();
   }
 }
