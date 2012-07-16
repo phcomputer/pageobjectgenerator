@@ -5,7 +5,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS-IS" BASIS,
@@ -15,6 +15,10 @@
 
 package com.google.testing.pogen;
 
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Arrays;
+
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
@@ -22,20 +26,15 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.Arrays;
-
 /**
- * A main class of PageObjectGenerator. The PageObjectGenerator is a tool to
- * generate modified template files inserting id attributes and skeleton test
- * code designed by PageObject pattern. The skeleton test code has getter
- * methods for html elements which contain template variables by using Selenium2
- * (WebDriver). So it reduces testers task such as inserting id attributes and
- * writing test code.
- *
+ * A main class of PageObjectGenerator. The PageObjectGenerator is a tool to generate modified
+ * template files inserting id attributes and skeleton test code designed by PageObject pattern. The
+ * skeleton test code has getter methods for html elements which contain template variables by using
+ * Selenium2 (WebDriver). So it reduces testers task such as inserting id attributes and writing
+ * test code.
+ * 
  * Currently only soy templates are supported.
- *
+ * 
  * @author Kazunori Sakamoto
  */
 public class PageObjectGenerator {
@@ -49,8 +48,7 @@ public class PageObjectGenerator {
    */
   private static final String MEASURE_COMMAND = "measure";
 
-  private PageObjectGenerator() {
-  }
+  private PageObjectGenerator() {}
 
   // Apache's OptionBuilder has static Builder pattern
   @SuppressWarnings("static-access")
@@ -127,9 +125,8 @@ public class PageObjectGenerator {
   }
 
   /**
-   * Prints the usage of the PageObjectGenerator with the specified
-   * {@link PrintStream} instance.
-   *
+   * Prints the usage of the PageObjectGenerator with the specified {@link PrintStream} instance.
+   * 
    * @param printStream the {@link PrintStream} to print
    */
   private static void printUsage(PrintStream printStream) {

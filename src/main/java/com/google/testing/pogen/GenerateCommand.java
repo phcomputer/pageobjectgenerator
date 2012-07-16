@@ -5,7 +5,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS-IS" BASIS,
@@ -14,6 +14,12 @@
 // limitations under the License.
 
 package com.google.testing.pogen;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -26,18 +32,13 @@ import com.google.testing.pogen.generator.test.java.TestCodeGenerator;
 import com.google.testing.pogen.parser.template.TemplateInfo;
 import com.google.testing.pogen.parser.template.TemplateParseException;
 import com.google.testing.pogen.parser.template.TemplateParser;
+import com.google.testing.pogen.parser.template.ejs.EjsParser;
 import com.google.testing.pogen.parser.template.soy.SoyParser;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.Arrays;
-
 /**
- * A class which represents the generate command to generate modified templates
- * and skeleton test code.
- *
+ * A class which represents the generate command to generate modified templates and skeleton test
+ * code.
+ * 
  * @author Kazunori Sakamoto
  */
 public class GenerateCommand extends Command {
@@ -71,9 +72,9 @@ public class GenerateCommand extends Command {
   private final boolean verbose;
 
   /**
-   * Constructs an instance with the specified output-directory path, the
-   * specified package name and the specified template paths.
-   *
+   * Constructs an instance with the specified output-directory path, the specified package name and
+   * the specified template paths.
+   * 
    * @param templatePaths the template paths to be parsed
    * @param testOutDirPath the output directory path of test codes
    * @param packageName the package name to generate skeleton test codes
@@ -106,11 +107,16 @@ public class GenerateCommand extends Command {
     } else if (verbose) {
       System.err.println("Already exists: " + newAbstractPageFile.getAbsolutePath() + ".");
     }
-    TemplateParser templateParser = new SoyParser();
 
     for (String templatePath : templatePaths) {
       File file = createFileFromFilePath(templatePath, true, true);
       try {
+        TemplateParser templateParser;
+        if (templatePath.endsWith(".ejs")) {
+          templateParser = new EjsParser();
+        } else {
+          templateParser = new SoyParser();
+        }
         parseAndGenerate(file, testOutDir, templateParser);
       } catch (TemplateParseException e) {
         throw new FileProcessException("Errors occur in parsing the specified files", file, e);
@@ -121,16 +127,15 @@ public class GenerateCommand extends Command {
   }
 
   /**
-   * Parses the specified template file and generates a modified template file
-   * and skeleton test code.
-   *
+   * Parses the specified template file and generates a modified template file and skeleton test
+   * code.
+   * 
    * @param templateFile the template file to be modified
    * @param codeOutDir the output directory of skeleton test code
    * @param parser the parser to parse template files
    * @throws IOException if errors occur in reading and writing files
    * @throws TemplateParseException if the specified template is in bad format
-   * @throws PageObjectUpdateException if the existing test code doesn't have
-   *         generated code
+   * @throws PageObjectUpdateException if the existing test code doesn't have generated code
    */
   private void parseAndGenerate(File templateFile, File codeOutDir, TemplateParser parser)
       throws IOException, TemplateParseException, PageObjectUpdateException {
@@ -184,10 +189,10 @@ public class GenerateCommand extends Command {
 
   /**
    * Backups the specified file. If the backup file has existed, does nothing.
-   *
+   * 
    * @param file the file to be backuped
-   * @return newly backuped file whose name is xxxxx.org if the backup file
-   *         doesn't exist, otherwise existing backup file
+   * @return newly backuped file whose name is xxxxx.org if the backup file doesn't exist, otherwise
+   *         existing backup file
    * @throws IOException if errors occur in backuping files
    */
   private File backupFile(File file) throws IOException {
@@ -202,7 +207,7 @@ public class GenerateCommand extends Command {
 
   /**
    * Gets the file name without the extension of the specified file.
-   *
+   * 
    * @param file file to get the name
    * @return the file name without the extension
    */
