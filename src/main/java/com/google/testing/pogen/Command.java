@@ -5,7 +5,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS-IS" BASIS,
@@ -21,30 +21,23 @@ import java.io.IOException;
 
 /**
  * A class which represents a command to be executed in the main class.
- *
+ * 
  * @author Kazunori Sakamoto
  */
 public abstract class Command {
 
   /**
-   * Returns a message to print as help.
-   *
-   * @return the message to print as help
-   */
-  public abstract String getHelpMessage();
-
-  /**
    * Executes this command.
-   *
+   * 
    * @throws IOException if errors occur in processing file
    */
   public abstract void execute() throws IOException;
 
   /**
    * Creates a {@link File} instance for the file specified by the path.
-   *
-   * @param filePath the path pointing to the existing file whose {@link File}
-   *        instance we want to create
+   * 
+   * @param filePath the path pointing to the existing file whose {@link File} instance we want to
+   *        create
    * @param checkCanRead {@code true} if checks the read permission
    * @param checkCanWrite {@code true} if checks the write permission
    * @return the {@link File} instance for the file
@@ -62,19 +55,19 @@ public abstract class Command {
   }
 
   /**
-   * Creates a {@link File} instance for the directory specified by the path.
-   *
-   * @param directoryPath the path pointing to the existing directory whose
-   *        {@link File} instance we want to create
+   * Creates the directory specified by the path and returns a {@link File} instance for it.
+   * 
+   * @param directoryPath the directory path to create
    * @param checkCanRead {@code true} if checks the read permission
    * @param checkCanWrite {@code true} if checks the write permission
    * @return the {@link File} instance for the directory
    * @throws FileNotFoundException if the file does not exist
    * @throws FileProcessException if errors occur in processing the directory
    */
-  public File createFileFromDirectoryPath(String directoryPath, boolean checkCanRead,
-      boolean checkCanWrite) throws FileNotFoundException, FileProcessException {
+  public File createDirectory(String directoryPath, boolean checkCanRead, boolean checkCanWrite)
+      throws FileNotFoundException, FileProcessException {
     File dir = new File(directoryPath);
+    dir.mkdirs();
     checkExistenceAndPermission(dir, checkCanRead, checkCanWrite);
     if (!dir.isDirectory()) {
       throw new FileProcessException("The specified path is not a directory", dir);
@@ -84,7 +77,7 @@ public abstract class Command {
 
   /**
    * Checks an existence and permission of the specified {@link File} instance.
-   *
+   * 
    * @param file the file to be checked
    * @param checkCanRead {@code true} if checks the read permission
    * @param checkCanWrite {@code true} if checks the write permission

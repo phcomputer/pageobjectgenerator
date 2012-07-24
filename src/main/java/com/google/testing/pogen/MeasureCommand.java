@@ -57,11 +57,6 @@ public class MeasureCommand extends Command {
   }
 
   @Override
-  public String getHelpMessage() {
-    return "java PageObjectGenerator measure [OPTIONS] <template_file1> <template_file2> ...";
-  }
-
-  @Override
   public void execute() throws IOException {
     int sumAllVariableCount = 0, sumVariableWithIdCount = 0;
     for (String templatePath : templatePaths) {

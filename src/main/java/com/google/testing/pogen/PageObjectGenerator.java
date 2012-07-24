@@ -69,6 +69,7 @@ public class PageObjectGenerator {
             .create('v'));
     // @formatter:on
 
+    String helpMessage = null;
     if (commandName.equals(GENERATE_COMMAND)) {
       // @formatter:off
       options
@@ -83,8 +84,13 @@ public class PageObjectGenerator {
               .isRequired()
               .create('o'));
       // @formatter:on
+      helpMessage =
+          "java PageObjectGenerator generate -o <test_out_dir> -p <package_name>"
+              + " [OPTIONS] <template_file1> <template_file2> ...";
     } else if (commandName.equals(MEASURE_COMMAND)) {
-      // No special options are required
+      helpMessage =
+          "java PageObjectGenerator generate -o <test_out_dir> -p <package_name>"
+              + " [OPTIONS] <template_file1> <template_file2> ...";
     } else {
       System.err.format("'%s' is not a PageObjectGenerator command.", commandName);
       printUsage(System.err);
@@ -92,6 +98,7 @@ public class PageObjectGenerator {
     }
 
     BasicParser cmdParser = new BasicParser();
+    HelpFormatter f = new HelpFormatter();
     try {
       CommandLine cl = cmdParser.parse(options, Arrays.copyOfRange(args, 1, args.length));
       Command command = null;
@@ -104,8 +111,7 @@ public class PageObjectGenerator {
         command = new MeasureCommand(templatePaths, cl.hasOption('v'));
       }
       if (cl.hasOption('h') || templatePaths.length == 0) {
-        HelpFormatter f = new HelpFormatter();
-        f.printHelp(command.getHelpMessage(), options);
+        f.printHelp(helpMessage, options);
         return;
       }
       try {
@@ -120,6 +126,7 @@ public class PageObjectGenerator {
     } catch (ParseException e) {
       System.err.println("Errors occur in parsing the command arguments.");
       System.err.println(e.getMessage());
+      f.printHelp(helpMessage, options);
     }
     System.exit(-1);
   }

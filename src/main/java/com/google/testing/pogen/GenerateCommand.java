@@ -44,10 +44,10 @@ import com.google.testing.pogen.parser.template.soy.SoyParser;
 public class GenerateCommand extends Command {
 
   /**
-   * A path string pointing the {@code AbstractPage} class.
+   * A file name of the {@code AbstractPage} class.
    */
-  private static final String ABSTRACT_PAGE_PATH =
-      "com/google/testing/pogen/generator/test/java/page/AbstractPage.java";
+  private static final String ABSTRACT_PAGE_NAME = "AbstractPage.java";
+
   /**
    * A package name of the {@code AbstractPage} class.
    */
@@ -89,18 +89,13 @@ public class GenerateCommand extends Command {
   }
 
   @Override
-  public String getHelpMessage() {
-    return "java PageObjectGenerator generate -o <test_out_dir> -p <package_name>"
-        + " [OPTIONS] <template_file1> <template_file2> ...";
-  }
-
-  @Override
   public void execute() throws IOException {
-    File testOutDir = createFileFromDirectoryPath(testOutDirPath, false, true);
+    File testOutDir = createDirectory(testOutDirPath, false, true);
+
     // Generate the AbstractPage class
-    File newAbstractPageFile = new File(testOutDir.getPath(), "AbstractPage.java");
+    File newAbstractPageFile = new File(testOutDir.getPath(), ABSTRACT_PAGE_NAME);
     if (!newAbstractPageFile.exists()) {
-      URL abstractPageUrl = Resources.getResource(ABSTRACT_PAGE_PATH);
+      URL abstractPageUrl = Resources.getResource(ABSTRACT_PAGE_NAME);
       String abstractPage = Resources.toString(abstractPageUrl, Charset.defaultCharset());
       abstractPage = abstractPage.replaceAll(ABSTRACT_PAGE_PACKAGE, packageName);
       Files.write(abstractPage, newAbstractPageFile, Charset.defaultCharset());
