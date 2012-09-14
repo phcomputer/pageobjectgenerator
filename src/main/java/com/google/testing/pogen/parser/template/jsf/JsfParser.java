@@ -13,12 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.testing.pogen.parser.template.ejs;
+package com.google.testing.pogen.parser.template.jsf;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -30,25 +29,16 @@ import com.google.testing.pogen.parser.template.TemplateParseException;
 import com.google.testing.pogen.parser.template.TemplateParser;
 
 /**
- * A class to parse a ejs template by using {@link EjsVariableExtractor}.
+ * A class to parse a JSF template by using {@link JsfVariableExtractor}.
  * 
  * @author Kazunori Sakamoto
  */
-public class EjsParser extends TemplateParser {
-  /**
-   * A regular expression which indicates the start tag of for.
-   */
-  private static final Pattern FOR_START_PATTERN = Pattern.compile("<%\\s*for");
-  /**
-   * A regular expression which indicates the end tag of for.
-   */
-  private static final Pattern FOR_END_PATTERN = Pattern.compile("<%\\s*}");
-
+public class JsfParser extends TemplateParser {
   @Override
   protected List<HtmlTagInfo> parseTagsContainingVariables(String template)
       throws TemplateParseException {
     Preconditions.checkNotNull(template);
-    EjsVariableExtractor extractor = new EjsVariableExtractor(new RangeSet<Integer>());
+    JsfVariableExtractor extractor = new JsfVariableExtractor(new RangeSet<Integer>());
     try {
       extractor.parse(new InputSource(new StringReader(template)));
     } catch (SAXException e) {
@@ -61,7 +51,6 @@ public class EjsParser extends TemplateParser {
 
   @Override
   protected RangeSet<Integer> parseRepeatedPart(String template) throws TemplateParseException {
-    // Get a set of merged ranges which locates the inner parts of for/foreach
-    return getIndexRangesOfNestedTags(template, FOR_START_PATTERN, FOR_END_PATTERN);
+    return new RangeSet<Integer>();
   }
 }

@@ -15,155 +15,25 @@
 
 package com.google.testing.pogen.parser.template.ejs;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Stack;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.xerces.xni.Augmentations;
-import org.apache.xerces.xni.NamespaceContext;
-import org.apache.xerces.xni.QName;
-import org.apache.xerces.xni.XMLAttributes;
-import org.apache.xerces.xni.XMLLocator;
-import org.apache.xerces.xni.XMLString;
-import org.apache.xerces.xni.XNIException;
-import org.cyberneko.html.HTMLEventInfo;
-import org.cyberneko.html.parsers.SAXParser;
-import org.xml.sax.SAXNotRecognizedException;
-import org.xml.sax.SAXNotSupportedException;
-
-import com.google.testing.pogen.parser.template.HtmlTagInfo;
 import com.google.testing.pogen.parser.template.RangeSet;
+import com.google.testing.pogen.parser.template.RegexVariableExtractor;
 import com.google.testing.pogen.parser.template.TemplateParseException;
 
 /**
- * A class to extract template variables with its parent html tags by parsing a template with
- * CyberNeko HTML Parser.
+ * A class to extract template variables for ejs template engine.
  * 
  * @author Kazunori Sakamoto
  */
-public class EjsVariableExtractor extends SAXParser {
-  /**
-   * A string to enable AUGMENTATIONS feature.
-   */
-  private static final String AUGMENTATIONS = "http://cyberneko.org/html/features/augmentations";
-  /**
-   * A regular expression which indicates template variable to print.
-   */
-  private static final Pattern VARIABLE_PATTERN = Pattern.compile("<%=\\s*(.*?)%>");
-  /**
-   * A stack of extracted information of a html tag such as the start position, the end position,
-   * the id value and the information of template variables. This field is only used to create the
-   * {@code sortedHtmlTagInfos} filed.
-   */
-  private final Stack<HtmlTagInfo> tagInfoStack;
-  /**
-   * A list of extracted information of a html tag sorted by appearance of the end tag which
-   * contains template variables.
-   */
-  private final List<HtmlTagInfo> sortedHtmlTagInfos;
-  /**
-   * Positions of excluded parts such as "{call .t1}excluded part{/call}".
-   */
-  private final RangeSet<Integer> excludedRanges;
-  /**
-   * A string for divided characters because "<%=a%>" is diveded into "<" and "%=a%>".
-   */
-  private String lastText;
+public class EjsVariableExtractor extends RegexVariableExtractor {
 
-  /**
-   * Constructs an instance to extract template variables with the specified positions of excluded
-   * parts.
-   * 
-   * @param excludedRanges a {@link RangeSet} with the positions of excluded parts
-   * @throws TemplateParseException if the specified template is in bad format
-   */
   public EjsVariableExtractor(RangeSet<Integer> excludedRanges) throws TemplateParseException {
-    this.excludedRanges = excludedRanges;
-    this.tagInfoStack = new Stack<HtmlTagInfo>();
-    this.sortedHtmlTagInfos = new ArrayList<HtmlTagInfo>();
-
-    // CyberNeko HTML Parser supports AUGMENTATIONS
-    try {
-      setFeature(AUGMENTATIONS, true);
-    } catch (SAXNotRecognizedException e) {
-      throw new TemplateParseException(e);
-    } catch (SAXNotSupportedException e) {
-      throw new TemplateParseException(e);
-    }
-  }
-
-  public List<HtmlTagInfo> getSortedHtmlTagInfos() {
-    return Collections.unmodifiableList(sortedHtmlTagInfos);
+    super(excludedRanges);
   }
 
   @Override
-  public void startDocument(XMLLocator locator, String encoding, NamespaceContext namespaceContext,
-      Augmentations augs) throws XNIException {
-    tagInfoStack.clear();
-    sortedHtmlTagInfos.clear();
-    lastText = "";
-
-    super.startDocument(locator, encoding, namespaceContext, augs);
-  }
-
-  @Override
-  public void startElement(QName element, XMLAttributes attrs, Augmentations augs) {
-    processCharacters();
-
-    // Get offset information
-    HTMLEventInfo info = (HTMLEventInfo) augs.getItem(AUGMENTATIONS);
-    HtmlTagInfo tagInfo =
-        new HtmlTagInfo(attrs.getValue("id"), info.getBeginCharacterOffset(),
-            info.getEndCharacterOffset());
-    tagInfoStack.push(tagInfo);
-
-    for (int i = 0; i < attrs.getLength(); i++) {
-      // Ignore variables appearing two more than
-      Matcher matcher = VARIABLE_PATTERN.matcher(attrs.getValue(i));
-      while (matcher.find()) {
-        if (!excludedRanges.contains(matcher.start(1))) {
-          tagInfo.addVariableInfo(matcher.group(1), matcher.start(1), attrs.getQName(i));
-        }
-      }
-    }
-
-    super.startElement(element, attrs, augs);
-  }
-
-  @Override
-  public void endElement(QName element, Augmentations augs) throws XNIException {
-    processCharacters();
-
-    HtmlTagInfo tagInfo = tagInfoStack.pop();
-    if (!tagInfo.hasVariables()) {
-      sortedHtmlTagInfos.add(tagInfo);
-    }
-
-    super.endElement(element, augs);
-  }
-
-  private void processCharacters() {
-    Matcher matcher = VARIABLE_PATTERN.matcher(lastText);
-    while (matcher.find()) {
-      if (excludedRanges.contains(matcher.start(1))) {
-        continue;
-      }
-      // tagInfoStack always has some elements because NekoHTML add <html> tag
-      // as a root element automatically
-      // Note that tags automatically added have -1 start/end indexes
-      HtmlTagInfo tagInfo = tagInfoStack.peek();
-      tagInfo.addVariableInfo(matcher.group(1), matcher.start(1));
-    }
-    lastText = "";
-  }
-
-  @Override
-  public void characters(XMLString string, Augmentations augs) throws XNIException {
-    lastText += string.toString();
-
-    super.characters(string, augs);
+  protected Pattern initializeVariablePattern() {
+    return Pattern.compile("<%=\\s*(.*?)%>");
   }
 }

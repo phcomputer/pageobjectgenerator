@@ -33,7 +33,7 @@ import com.google.testing.pogen.parser.template.TemplateParseException;
 import com.google.testing.pogen.parser.template.TemplateParser;
 
 /**
- * A class to parse a soy template by using {@link SoyVariableExtractor}
+ * A class to parse a soy template by using {@link SoyVariableExtractor}.
  * 
  * @author Kazunori Sakamoto
  */

@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.testing.pogen.parser.template.soy;
+package com.google.testing.pogen.parser.template.jsf;
 
 import java.util.regex.Pattern;
 
@@ -22,18 +22,18 @@ import com.google.testing.pogen.parser.template.RegexVariableExtractor;
 import com.google.testing.pogen.parser.template.TemplateParseException;
 
 /**
- * A class to extract template variables for soy template engine.
+ * A class to extract template variables for JSF template engine.
  * 
  * @author Kazunori Sakamoto
  */
-public class SoyVariableExtractor extends RegexVariableExtractor {
+public class JsfVariableExtractor extends RegexVariableExtractor {
 
-  public SoyVariableExtractor(RangeSet<Integer> excludedRanges) throws TemplateParseException {
+  public JsfVariableExtractor(RangeSet<Integer> excludedRanges) throws TemplateParseException {
     super(excludedRanges);
   }
 
   @Override
   protected Pattern initializeVariablePattern() {
-    return Pattern.compile("\\{\\$([^{|]*)(|[^{]*)?\\}");
+    return Pattern.compile("#\\{([^\"'][^{|]*[^\"']||[^{]*[^{\\s\"'][^{]*)\\}");
   }
 }
