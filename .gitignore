@@ -33,3 +33,6 @@ output
 download
 *.docstates
 *~
+.settings
+.classpath
+.project
