@@ -33,6 +33,7 @@ import com.google.testing.pogen.parser.template.TemplateInfo;
 import com.google.testing.pogen.parser.template.TemplateParseException;
 import com.google.testing.pogen.parser.template.TemplateParser;
 import com.google.testing.pogen.parser.template.ejs.EjsParser;
+import com.google.testing.pogen.parser.template.jsf.JsfParser;
 import com.google.testing.pogen.parser.template.soy.SoyParser;
 
 /**
@@ -109,6 +110,8 @@ public class GenerateCommand extends Command {
         TemplateParser templateParser;
         if (templatePath.endsWith(".ejs")) {
           templateParser = new EjsParser();
+        } else if (templatePath.endsWith(".xhtml")) {
+          templateParser = new JsfParser();
         } else {
           templateParser = new SoyParser();
         }
@@ -164,9 +167,10 @@ public class GenerateCommand extends Command {
     }
 
     // @formatter:off
-    String testCode = codeFile.exists()
-        ? pogen.update(templateInfo, Files.toString(codeFile, Charset.defaultCharset()))
-        : pogen.generate(templateInfo, packageName, pageName);
+    String testCode =
+        codeFile.exists() ? pogen.update(templateInfo,
+            Files.toString(codeFile, Charset.defaultCharset())) : pogen.generate(templateInfo,
+            packageName, pageName);
     // @formatter:on
     if (verbose) {
       System.out.print(".");
