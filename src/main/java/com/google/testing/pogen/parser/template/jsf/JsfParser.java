@@ -34,11 +34,23 @@ import com.google.testing.pogen.parser.template.TemplateParser;
  * @author Kazunori Sakamoto
  */
 public class JsfParser extends TemplateParser {
+
+  /**
+   * Constructs the instance of {@link TemplateParser} with the specified attribute name to be
+   * inserted.
+   * 
+   * @param attributeName the attribute name to be inserted
+   */
+  public JsfParser(String attributeName) {
+    super(attributeName);
+  }
+
   @Override
   protected List<HtmlTagInfo> parseTagsContainingVariables(String template)
       throws TemplateParseException {
     Preconditions.checkNotNull(template);
-    JsfVariableExtractor extractor = new JsfVariableExtractor(new RangeSet<Integer>());
+    JsfVariableExtractor extractor =
+        new JsfVariableExtractor(new RangeSet<Integer>(), attributeName);
     try {
       extractor.parse(new InputSource(new StringReader(template)));
     } catch (SAXException e) {

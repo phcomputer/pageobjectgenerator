@@ -44,11 +44,22 @@ public class EjsParser extends TemplateParser {
    */
   private static final Pattern FOR_END_PATTERN = Pattern.compile("<%\\s*}");
 
+  /**
+   * Constructs the instance of {@link TemplateParser} with the specified attribute name to be
+   * inserted.
+   * 
+   * @param attributeName the attribute name to be inserted
+   */
+  public EjsParser(String attributeName) {
+    super(attributeName);
+  }
+
   @Override
   protected List<HtmlTagInfo> parseTagsContainingVariables(String template)
       throws TemplateParseException {
     Preconditions.checkNotNull(template);
-    EjsVariableExtractor extractor = new EjsVariableExtractor(new RangeSet<Integer>());
+    EjsVariableExtractor extractor =
+        new EjsVariableExtractor(new RangeSet<Integer>(), attributeName);
     try {
       extractor.parse(new InputSource(new StringReader(template)));
     } catch (SAXException e) {

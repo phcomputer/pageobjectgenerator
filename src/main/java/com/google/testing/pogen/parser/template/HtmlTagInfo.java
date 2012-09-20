@@ -5,7 +5,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS-IS" BASIS,
@@ -15,20 +15,20 @@
 
 package com.google.testing.pogen.parser.template;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
-
 import java.util.Collection;
 import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
+
 /**
- * A class to contain the information of a html tag such as its location, its id
- * value and template variables which it contains. The instance of this class is
- * used to retrieve template variables on the html tag unit.
- *
+ * A class to contain the information of a html tag such as its location, its specific attribute
+ * value and template variables which it contains. The instance of this class is used to retrieve
+ * template variables on the html tag unit.
+ * 
  * @author Kazunori Sakamoto
  */
 public class HtmlTagInfo {
@@ -43,41 +43,40 @@ public class HtmlTagInfo {
    */
   private final int endIndex;
   /**
-   * An id value of this tag. This is null if this html tag has no id attribute.
+   * A specific attribute value of this tag. This is null if this html tag has no attribute. Note
+   * that the variable extractor chooses attributes to memorize.
    */
-  private String id;
+  private String attributeValue;
   /**
    * A map of variable names and {@link VariableInfo} instances.
    */
   private final Map<String, VariableInfo> variables;
 
   /**
-   * Constructs an instance with the specified id value, the specified start and
-   * the specified end positions. Note that when a template variable has no
-   * parent html tag, this class assumes it has a virtual root html tag and
-   * {@code startIndex} and {@code endIndex} should be -1.
-   *
-   * @param id the id value of this tag
+   * Constructs an instance with the specific attribute value, the specified start and the specified
+   * end positions. Note that when a template variable has no parent html tag, this class assumes it
+   * has a virtual root html tag and {@code startIndex} and {@code endIndex} should be -1.
+   * 
+   * @param attributeValue the specific attribute value of this tag
    * @param startIndex the start position of this tag
    * @param endIndex the end position of this tag
    */
-  public HtmlTagInfo(@Nullable String id, int startIndex, int endIndex) {
+  public HtmlTagInfo(@Nullable String attributeValue, int startIndex, int endIndex) {
     Preconditions.checkArgument(startIndex >= -1);
     Preconditions.checkArgument(endIndex >= -1);
 
-    this.id = id;
+    this.attributeValue = attributeValue;
     this.startIndex = startIndex;
     this.endIndex = endIndex;
     this.variables = Maps.newHashMap();
   }
 
   /**
-   * Adds a {@link VariableInfo} instance with the specified variable name and
-   * the specified start index.
-   *
+   * Adds a {@link VariableInfo} instance with the specified variable name and the specified start
+   * index.
+   * 
    * @param variableName the name of the template variable to be added
-   * @param variableStartIndex the start position of the template variable in
-   *        the parsed template
+   * @param variableStartIndex the start position of the template variable in the parsed template
    */
   public void addVariableInfo(String variableName, int variableStartIndex) {
     Preconditions.checkArgument(!Strings.isNullOrEmpty(variableName));
@@ -88,14 +87,12 @@ public class HtmlTagInfo {
   }
 
   /**
-   * Adds a {@link VariableInfo} instance with the specified variable name, the
-   * specified attribute name and the specified start index.
-   *
+   * Adds a {@link VariableInfo} instance with the specified variable name, the specified attribute
+   * name and the specified start index.
+   * 
    * @param variableName the name of the template variable to be added
-   * @param variableStartIndex the start position of the template variable in
-   *        the parsed template
-   * @param attributeName the name of the attribute which contains the template
-   *        variable
+   * @param variableStartIndex the start position of the template variable in the parsed template
+   * @param attributeName the name of the attribute which contains the template variable
    */
   public void addVariableInfo(String variableName, int variableStartIndex, String attributeName) {
     Preconditions.checkArgument(!Strings.isNullOrEmpty(variableName));
@@ -107,14 +104,11 @@ public class HtmlTagInfo {
   }
 
   /**
-   * Returns the existing {@link VariableInfo} instance or a generated one if it
-   * doesn't exist.
-   *
+   * Returns the existing {@link VariableInfo} instance or a generated one if it doesn't exist.
+   * 
    * @param variableName the name of the template variable to be added
-   * @param variableStartIndex the start position of the template variable in
-   *        the parsed template
-   * @return the existing {@link VariableInfo} instance or a generated one if it
-   *         doesn't exist
+   * @param variableStartIndex the start position of the template variable in the parsed template
+   * @return the existing {@link VariableInfo} instance or a generated one if it doesn't exist
    */
   private VariableInfo getOrCreateVariableInfo(String variableName, int variableStartIndex) {
     VariableInfo varInfo = variables.get(variableName);
@@ -127,7 +121,7 @@ public class HtmlTagInfo {
 
   /**
    * Returns {@code true} if this html tag has template variables.
-   *
+   * 
    * @return {@code true} if this html tag has template variables
    */
   public boolean hasVariables() {
@@ -135,17 +129,18 @@ public class HtmlTagInfo {
   }
 
   /**
-   * Returns {@code true} if this html tag has an id attribute.
-   *
-   * @return {@code true} if this html tag has an id attribute
+   * Returns {@code true} if this html tag has the specific attribute. Note that the variable
+   * extractor chooses attributes to memorize.
+   * 
+   * @return {@code true} if this html tag has the specific attribute
    */
-  public boolean hasId() {
-    return id != null;
+  public boolean hasAttributeValue() {
+    return attributeValue != null;
   }
 
   /**
    * Returns {@code true} if this html tag has a parent tag.
-   *
+   * 
    * @return {@code true} if this html tag has a parent tag
    */
   public boolean hasParentTag() {
@@ -162,8 +157,8 @@ public class HtmlTagInfo {
     return endIndex;
   }
 
-  public String getId() {
-    return id;
+  public String getAttributeValue() {
+    return attributeValue;
   }
 
   public Collection<VariableInfo> getVariableInfos() {
@@ -171,6 +166,6 @@ public class HtmlTagInfo {
   }
 
   public void setId(String idValue) {
-    this.id = idValue;
+    this.attributeValue = idValue;
   }
 }

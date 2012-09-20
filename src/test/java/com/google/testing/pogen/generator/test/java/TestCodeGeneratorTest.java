@@ -5,7 +5,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS-IS" BASIS,
@@ -15,17 +15,18 @@
 
 package com.google.testing.pogen.generator.test.java;
 
-import static org.junit.Assert.assertEquals;
-
-import com.google.testing.pogen.generator.template.TemplateUpdater;
-import com.google.testing.pogen.parser.template.TemplateInfo;
-import com.google.testing.pogen.parser.template.TemplateParseException;
-import com.google.testing.pogen.parser.template.soy.SoyParser;
+import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
+import com.google.testing.pogen.generator.template.TemplateUpdater;
+import com.google.testing.pogen.generator.template.TemplateUpdaters;
+import com.google.testing.pogen.parser.template.TemplateInfo;
+import com.google.testing.pogen.parser.template.TemplateParseException;
+import com.google.testing.pogen.parser.template.soy.SoyParser;
 
 // @formatter:off
 /**
@@ -67,8 +68,8 @@ public class TestCodeGeneratorTest {
 
   @Before
   public void setUp() {
-    updater = new TemplateUpdater("_");
-    parser = new SoyParser();
+    updater = TemplateUpdaters.getPreferredUpdater("id", "_");
+    parser = new SoyParser("id");
     pageObjectGenerator = new TestCodeGenerator("  ", "\n");
   }
 

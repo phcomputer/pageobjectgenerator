@@ -5,7 +5,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS-IS" BASIS,
@@ -15,20 +15,20 @@
 
 package com.google.testing.pogen.measurer;
 
-import static org.junit.Assert.assertEquals;
-
-import com.google.testing.pogen.parser.template.TemplateInfo;
-import com.google.testing.pogen.parser.template.TemplateParseException;
-import com.google.testing.pogen.parser.template.soy.SoyParser;
+import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import com.google.testing.pogen.parser.template.TemplateInfo;
+import com.google.testing.pogen.parser.template.TemplateParseException;
+import com.google.testing.pogen.parser.template.soy.SoyParser;
+
 /**
  * Tests for {@link VariableCoverageMeasurer}.
- *
+ * 
  * @author Kazunori Sakamoto
  */
 @RunWith(JUnit4.class)
@@ -37,7 +37,7 @@ public class VariableCoverageMeasurerTest {
 
   @Before
   public void setUp() {
-    soyParser = new SoyParser();
+    soyParser = new SoyParser("id");
   }
 
   @Test

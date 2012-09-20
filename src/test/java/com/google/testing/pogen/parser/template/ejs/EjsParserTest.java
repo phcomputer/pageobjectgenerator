@@ -41,7 +41,7 @@ public class EjsParserTest {
 
   @Before
   public void setUp() {
-    parser = new EjsParser();
+    parser = new EjsParser("id");
   }
 
   @Test

@@ -5,7 +5,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS-IS" BASIS,
@@ -15,54 +15,52 @@
 
 package com.google.testing.pogen.generator.template;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.testing.pogen.parser.template.HtmlTagInfo;
 import com.google.testing.pogen.parser.template.TemplateInfo;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
 /**
- * A class to modify the template from the specified {@link TemplateInfo}
- * instance.
- *
+ * A class to modify the template from the specified {@link TemplateInfo} instance.
+ * 
  * @author Kazunori Sakamoto
  */
-public class TemplateUpdater {
+public abstract class TemplateUpdater {
   /**
-   * A prefix of a new id attribute.
+   * A prefix of a generating attribute value.
    */
-  private final String idPrefix;
+  private final String attributeValuePrefix;
   /**
-   * A unique number to generate new id attributes.
+   * A unique number to generate new attribute values.
    */
   private int idCount = 0;
 
   /**
-   * Constructs an instance with the default prefix of a new id attribute.
+   * Constructs an instance with the default prefix of a generating attribute value.
    */
-  public TemplateUpdater() {
+  TemplateUpdater() {
     this("__pogen_");
   }
 
   /**
-   * Constructs an instance with the given prefix of a new id attribute.
-   *
-   * @param idPrefix the prefix of a new id attribute
+   * Constructs an instance with the given prefix of a generating attribute value.
+   * 
+   * @param attributeValuePrefix the prefix of a generating attribute value
    */
-  public TemplateUpdater(String idPrefix) {
-    this.idPrefix = idPrefix;
+  TemplateUpdater(String attributeValuePrefix) {
+    this.attributeValuePrefix = attributeValuePrefix;
   }
 
   /**
-   * Generates a modified template from the specified {@link TemplateInfo}
-   * inserting id attributes into html tags which contain template variables.
-   *
-   * @param templateInfo the {@link TemplateInfo} instance of the template to be
-   *        updated
+   * Generates a modified template from the specified {@link TemplateInfo} inserting specific
+   * attributes into html tags which contain template variables.
+   * 
+   * @param templateInfo the {@link TemplateInfo} instance of the template to be updated
    * @return the modified template with the inserted id attributes
    */
   public String generate(TemplateInfo templateInfo) {
@@ -96,28 +94,9 @@ public class TemplateUpdater {
       newTemplate.append(template.subSequence(lastIndex, tagInfo.getStartIndex()));
       lastIndex = tagInfo.getEndIndex();
 
-      // Construct a modified template
-      StringBuilder sb =
-          new StringBuilder(template.substring(tagInfo.getStartIndex(), tagInfo.getEndIndex()));
-      if (!tagInfo.hasId()) {
-        tagInfo.setId(generateUniqueId());
-        // Deal with closed tag such as <br />
-        int insertIndex = sb.length() - 2;
-        String tail = ">";
-        if (sb.charAt(insertIndex) == '/') {
-          --insertIndex;
-          tail = " />";
-        }
-        // Remove redundant space
-        while (sb.charAt(insertIndex) == ' ') {
-          insertIndex--;
-        }
-        // Insert the generated id attribute
-        sb.setLength(insertIndex + 1);
-        sb.append(" id=\"" + tagInfo.getId() + "\"" + tail);
-      }
-      newTemplate.append(sb);
-
+      // Build a modified tag containing template variables
+      StringBuilder tag = buildModifiedTag(template, tagInfo);
+      newTemplate.append(tag);
     }
     // Add the rest part of the template
     newTemplate.append(template.subSequence(lastIndex, template.length()));
@@ -125,12 +104,22 @@ public class TemplateUpdater {
   }
 
   /**
-   * Generates a unique id value.
-   *
-   * @return the generated unique id value
+   * Builds the modified tag containing template variables.
+   * 
+   * @param template the string of the html template
+   * @param tagInfo the information of the html tag containing template variables
+   * @return the string of the modified tag
+   */
+  protected abstract StringBuilder buildModifiedTag(String template, HtmlTagInfo tagInfo);
+
+
+  /**
+   * Generates a unique attribute value.
+   * 
+   * @return the generated unique attribute value
    */
   @VisibleForTesting
   protected String generateUniqueId() {
-    return idPrefix + (idCount++);
+    return attributeValuePrefix + (idCount++);
   }
 }

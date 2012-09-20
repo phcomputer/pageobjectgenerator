@@ -48,6 +48,11 @@ public class PageObjectGenerator {
    */
   private static final String MEASURE_COMMAND = "measure";
 
+  /**
+   * A name of list command.
+   */
+  private static final String LIST_COMMAND = "list";
+
   private PageObjectGenerator() {}
 
   // Apache's OptionBuilder has static Builder pattern
@@ -61,6 +66,10 @@ public class PageObjectGenerator {
     String commandName = args[0];
     // @formatter:off
     Options options = new Options()
+        .addOption(OptionBuilder
+            .withDescription("Attribute name to be inserted (default is 'id').")
+            .hasArg()
+            .create('a'))
         .addOption(OptionBuilder
             .withDescription("Print help for this command.")
             .create('h'))
@@ -89,8 +98,9 @@ public class PageObjectGenerator {
               + " [OPTIONS] <template_file1> <template_file2> ...";
     } else if (commandName.equals(MEASURE_COMMAND)) {
       helpMessage =
-          "java PageObjectGenerator generate -o <test_out_dir> -p <package_name>"
-              + " [OPTIONS] <template_file1> <template_file2> ...";
+          "java PageObjectGenerator measure [OPTIONS] <template_file1> <template_file2> ...";
+    } else if (commandName.equals(LIST_COMMAND)) {
+      helpMessage = "java PageObjectGenerator list <template_file1> <template_file2> ...";
     } else {
       System.err.format("'%s' is not a PageObjectGenerator command.", commandName);
       printUsage(System.err);
@@ -103,12 +113,16 @@ public class PageObjectGenerator {
       CommandLine cl = cmdParser.parse(options, Arrays.copyOfRange(args, 1, args.length));
       Command command = null;
       String[] templatePaths = cl.getArgs();
+      String attributeName = cl.getOptionValue('a');
+      attributeName = attributeName != null ? attributeName : "id";
       if (commandName.equals(GENERATE_COMMAND)) {
         command =
             new GenerateCommand(templatePaths, cl.getOptionValue('o'), cl.getOptionValue('p'),
-                cl.hasOption('v'));
+                attributeName, cl.hasOption('v'));
       } else if (commandName.equals(MEASURE_COMMAND)) {
-        command = new MeasureCommand(templatePaths, cl.hasOption('v'));
+        command = new MeasureCommand(templatePaths, attributeName, cl.hasOption('v'));
+      } else if (commandName.equals(LIST_COMMAND)) {
+        command = new ListCommand(templatePaths, attributeName);
       }
       if (cl.hasOption('h') || templatePaths.length == 0) {
         f.printHelp(helpMessage, options);
@@ -142,5 +156,6 @@ public class PageObjectGenerator {
     printStream.format("   %-10s Generate modified templates and skeleton test code\n",
         GENERATE_COMMAND);
     printStream.format("   %-10s Measure template-variable coverage\n", MEASURE_COMMAND);
+    printStream.format("   %-10s List template variables and ids\n", LIST_COMMAND);
   }
 }

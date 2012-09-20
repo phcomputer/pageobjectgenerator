@@ -40,7 +40,7 @@ public class JsfParserTest {
 
   @Before
   public void setUp() {
-    parser = new JsfParser();
+    parser = new JsfParser("id");
   }
 
   @Test

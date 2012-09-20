@@ -68,16 +68,23 @@ public abstract class RegexVariableExtractor extends SAXParser {
    * A string for divided characters because "<%=a%>" is diveded into "<" and "%=a%>".
    */
   private String lastText;
+  /**
+   * A string of attribute name for memorizing the attribute value in tags.
+   */
+  private String attributeName;
 
   /**
    * Constructs an instance to extract template variables with the specified positions of excluded
-   * parts.
+   * parts and the given attribute name for memorizing the value.
    * 
-   * @param excludedRanges a {@link RangeSet} with the positions of excluded parts
+   * @param excludedRanges the {@link RangeSet} with the positions of excluded parts
+   * @param attributeName the string of attribute name for memorizing the attribute value in tags
    * @throws TemplateParseException if the specified template is in bad format
    */
-  public RegexVariableExtractor(RangeSet<Integer> excludedRanges) throws TemplateParseException {
+  public RegexVariableExtractor(RangeSet<Integer> excludedRanges, String attributeName)
+      throws TemplateParseException {
     this.excludedRanges = excludedRanges;
+    this.attributeName = attributeName;
     this.tagInfoStack = new Stack<HtmlTagInfo>();
     this.sortedHtmlTagInfos = new ArrayList<HtmlTagInfo>();
     this.variablePattern = initializeVariablePattern();
@@ -120,7 +127,7 @@ public abstract class RegexVariableExtractor extends SAXParser {
     // Get offset information
     HTMLEventInfo info = (HTMLEventInfo) augs.getItem(AUGMENTATIONS);
     HtmlTagInfo tagInfo =
-        new HtmlTagInfo(attrs.getValue("id"), info.getBeginCharacterOffset(),
+        new HtmlTagInfo(attrs.getValue(attributeName), info.getBeginCharacterOffset(),
             info.getEndCharacterOffset());
     tagInfoStack.push(tagInfo);
 

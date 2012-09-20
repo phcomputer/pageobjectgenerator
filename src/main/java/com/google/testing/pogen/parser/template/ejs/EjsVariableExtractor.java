@@ -28,8 +28,17 @@ import com.google.testing.pogen.parser.template.TemplateParseException;
  */
 public class EjsVariableExtractor extends RegexVariableExtractor {
 
-  public EjsVariableExtractor(RangeSet<Integer> excludedRanges) throws TemplateParseException {
-    super(excludedRanges);
+  /**
+   * Constructs an instance to extract template variables with the specified positions of excluded
+   * parts and the given attribute name for memorizing the value.
+   * 
+   * @param excludedRanges a {@link RangeSet} with the positions of excluded parts
+   * @param attributeName a string of attribute name for memorizing the attribute value in tags
+   * @throws TemplateParseException if the specified template is in bad format
+   */
+  public EjsVariableExtractor(RangeSet<Integer> excludedRanges, String attributeName)
+      throws TemplateParseException {
+    super(excludedRanges, attributeName);
   }
 
   @Override

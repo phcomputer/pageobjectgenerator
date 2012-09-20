@@ -69,6 +69,16 @@ public class SoyParser extends TemplateParser {
    */
   private static final Pattern CALL_END_PATTERN = Pattern.compile("\\{/call\\}");
 
+  /**
+   * Constructs the instance of {@link TemplateParser} with the specified attribute name to be
+   * inserted.
+   * 
+   * @param attributeName the attribute name to be inserted
+   */
+  public SoyParser(String attributeName) {
+    super(attributeName);
+  }
+
   @Override
   protected List<HtmlTagInfo> parseTagsContainingVariables(String template)
       throws TemplateParseException {
@@ -78,7 +88,7 @@ public class SoyParser extends TemplateParser {
     // Because parameters should be tested in the callee side.
     RangeSet<Integer> excludedPart =
         getIndexRangesOfNonNestedTags(template, CALL_START_PATTERN, CALL_END_PATTERN);
-    SoyVariableExtractor extractor = new SoyVariableExtractor(excludedPart);
+    SoyVariableExtractor extractor = new SoyVariableExtractor(excludedPart, attributeName);
     try {
       extractor.parse(new InputSource(new StringReader(template)));
     } catch (SAXException e) {

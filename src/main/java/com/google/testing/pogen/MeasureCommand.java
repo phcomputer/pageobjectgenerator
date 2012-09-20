@@ -25,8 +25,7 @@ import com.google.testing.pogen.measurer.VariableCoverage;
 import com.google.testing.pogen.measurer.VariableCoverageMeasurer;
 import com.google.testing.pogen.parser.template.TemplateParseException;
 import com.google.testing.pogen.parser.template.TemplateParser;
-import com.google.testing.pogen.parser.template.ejs.EjsParser;
-import com.google.testing.pogen.parser.template.soy.SoyParser;
+import com.google.testing.pogen.parser.template.TemplateParsers;
 
 /**
  * A class which represents the measure command to print the measurement result of template-variable
@@ -44,15 +43,21 @@ public class MeasureCommand extends Command {
    * A boolean whether prints processed files verbosely.
    */
   private final boolean verbose;
+  /**
+   * An attribute name to be inserted.
+   */
+  private final String attributeName;
 
   /**
    * Constructs an instance with the specified template paths.
    * 
    * @param templatePaths the template paths to be parsed
+   * @param attributeName the attribute name to be inserted
    * @param verbose the boolean whether prints processed files verbosely
    */
-  public MeasureCommand(String[] templatePaths, boolean verbose) {
+  public MeasureCommand(String[] templatePaths, String attributeName, boolean verbose) {
     this.templatePaths = Arrays.copyOf(templatePaths, templatePaths.length);
+    this.attributeName = attributeName;
     this.verbose = verbose;
   }
 
@@ -60,12 +65,8 @@ public class MeasureCommand extends Command {
   public void execute() throws IOException {
     int sumAllVariableCount = 0, sumVariableWithIdCount = 0;
     for (String templatePath : templatePaths) {
-      TemplateParser templateParser;
-      if (templatePath.endsWith(".ejs")) {
-        templateParser = new EjsParser();
-      } else {
-        templateParser = new SoyParser();
-      }
+      TemplateParser templateParser =
+          TemplateParsers.getPreferredParser(templatePath, attributeName);
       File templateFile = createFileFromFilePath(templatePath, true, false);
       String template = Files.toString(templateFile, Charset.defaultCharset());
       try {

@@ -40,7 +40,7 @@ public class VariableCoverageMeasurer {
     for (HtmlTagInfo tagInfo : templateInfo.getHtmlTagInfos()) {
       for (@SuppressWarnings("unused")
       VariableInfo varInfo : tagInfo.getVariableInfos()) {
-        if (tagInfo.hasId()) {
+        if (tagInfo.hasAttributeValue()) {
           varWithIdCount++;
         }
         allVarCount++;

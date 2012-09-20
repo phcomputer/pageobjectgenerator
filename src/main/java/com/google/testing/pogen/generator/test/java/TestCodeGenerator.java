@@ -166,7 +166,7 @@ public class TestCodeGenerator {
         continue;
       }
 
-      String id = tagInfo.getId();
+      String id = tagInfo.getAttributeValue();
       boolean isRepeated = templateInfo.isRepeated(tagInfo);
 
       for (VariableInfo varInfo : tagInfo.getVariableInfos()) {

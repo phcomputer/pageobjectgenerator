@@ -26,15 +26,15 @@ import com.google.common.base.Strings;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import com.google.testing.pogen.generator.template.TemplateUpdater;
+import com.google.testing.pogen.generator.template.TemplateUpdaters;
 import com.google.testing.pogen.generator.test.PageObjectUpdateException;
 import com.google.testing.pogen.generator.test.java.NameConverter;
 import com.google.testing.pogen.generator.test.java.TestCodeGenerator;
 import com.google.testing.pogen.parser.template.TemplateInfo;
 import com.google.testing.pogen.parser.template.TemplateParseException;
 import com.google.testing.pogen.parser.template.TemplateParser;
-import com.google.testing.pogen.parser.template.ejs.EjsParser;
+import com.google.testing.pogen.parser.template.TemplateParsers;
 import com.google.testing.pogen.parser.template.jsf.JsfParser;
-import com.google.testing.pogen.parser.template.soy.SoyParser;
 
 /**
  * A class which represents the generate command to generate modified templates and skeleton test
@@ -48,7 +48,6 @@ public class GenerateCommand extends Command {
    * A file name of the {@code AbstractPage} class.
    */
   private static final String ABSTRACT_PAGE_NAME = "AbstractPage.java";
-
   /**
    * A package name of the {@code AbstractPage} class.
    */
@@ -71,6 +70,10 @@ public class GenerateCommand extends Command {
    * A boolean whether prints processed files verbosely.
    */
   private final boolean verbose;
+  /**
+   * An attribute name to be inserted.
+   */
+  private final String attributeName;
 
   /**
    * Constructs an instance with the specified output-directory path, the specified package name and
@@ -79,13 +82,15 @@ public class GenerateCommand extends Command {
    * @param templatePaths the template paths to be parsed
    * @param testOutDirPath the output directory path of test codes
    * @param packageName the package name to generate skeleton test codes
+   * @param attributeName the attribute name to be inserted
    * @param verbose the boolean whether prints processed files verbosely
    */
   public GenerateCommand(String[] templatePaths, String testOutDirPath, String packageName,
-      boolean verbose) {
+      String attributeName, boolean verbose) {
     this.templatePaths = Arrays.copyOf(templatePaths, templatePaths.length);
     this.testOutDirPath = testOutDirPath;
     this.packageName = packageName;
+    this.attributeName = attributeName;
     this.verbose = verbose;
   }
 
@@ -107,15 +112,13 @@ public class GenerateCommand extends Command {
     for (String templatePath : templatePaths) {
       File file = createFileFromFilePath(templatePath, true, true);
       try {
-        TemplateParser templateParser;
-        if (templatePath.endsWith(".ejs")) {
-          templateParser = new EjsParser();
-        } else if (templatePath.endsWith(".xhtml")) {
-          templateParser = new JsfParser();
-        } else {
-          templateParser = new SoyParser();
+        TemplateParser parser = TemplateParsers.getPreferredParser(templatePath, attributeName);
+        TemplateUpdater updater = TemplateUpdaters.getPreferredUpdater(attributeName);
+        if (attributeName.equals("id") && parser instanceof JsfParser) {
+          System.out
+              .println("WARNING: Using id attribute is not recommmended for JSF templat engine.");
         }
-        parseAndGenerate(file, testOutDir, templateParser);
+        parseAndGenerate(file, testOutDir, parser, updater);
       } catch (TemplateParseException e) {
         throw new FileProcessException("Errors occur in parsing the specified files", file, e);
       } catch (PageObjectUpdateException e) {
@@ -131,12 +134,14 @@ public class GenerateCommand extends Command {
    * @param templateFile the template file to be modified
    * @param codeOutDir the output directory of skeleton test code
    * @param parser the parser to parse template files
+   * @param updater the updater to update template files
    * @throws IOException if errors occur in reading and writing files
    * @throws TemplateParseException if the specified template is in bad format
    * @throws PageObjectUpdateException if the existing test code doesn't have generated code
    */
-  private void parseAndGenerate(File templateFile, File codeOutDir, TemplateParser parser)
-      throws IOException, TemplateParseException, PageObjectUpdateException {
+  private void parseAndGenerate(File templateFile, File codeOutDir, TemplateParser parser,
+      TemplateUpdater updater) throws IOException, TemplateParseException,
+      PageObjectUpdateException {
     Preconditions.checkNotNull(templateFile);
     Preconditions.checkNotNull(codeOutDir);
     Preconditions.checkArgument(!Strings.isNullOrEmpty(packageName));
@@ -155,7 +160,7 @@ public class GenerateCommand extends Command {
       System.out.print(".");
     }
     // Generate modified template
-    String modifiedTemplate = new TemplateUpdater().generate(templateInfo);
+    String modifiedTemplate = updater.generate(templateInfo);
     if (verbose) {
       System.out.print(".");
     }

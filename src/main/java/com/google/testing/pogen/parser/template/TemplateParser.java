@@ -34,9 +34,25 @@ import com.google.common.collect.Ranges;
 public abstract class TemplateParser {
 
   /**
+   * An attribute name to be inserted.
+   */
+  protected final String attributeName;
+
+  /**
+   * Constructs the instance of {@link TemplateParser} with the specified attribute name to be
+   * inserted.
+   * 
+   * @param attributeName the attribute name to be inserted
+   */
+  public TemplateParser(String attributeName) {
+    this.attributeName = attributeName;
+  }
+
+  /**
    * Retrieves the information of the specified template by parsing it.
    * 
-   * @param template the template to be parsed
+   * @param template the string of the template to be parsed
+   * @param attributeName the attribute name to be inserted
    * @return the information of the specified template
    * @throws TemplateParseException if the specified template is in bad format
    */

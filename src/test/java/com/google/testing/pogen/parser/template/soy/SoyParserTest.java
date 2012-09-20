@@ -40,7 +40,7 @@ public class SoyParserTest {
 
   @Before
   public void setUp() {
-    parser = new SoyParser();
+    parser = new SoyParser("id");
   }
 
   @Test
