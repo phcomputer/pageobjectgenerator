@@ -40,14 +40,16 @@ public class ListCommand extends Command {
    */
   private final String[] templatePaths;
   /**
-   * An attribute name to be inserted.
+   * A name of the attribute to be assigned for tags containing template variables
    */
   private final String attributeName;
 
   /**
-   * Constructs an instance with the specified template paths.
+   * Constructs an instance with the specified template paths and the specified attribute name.
    * 
    * @param templatePaths the template paths to be parsed
+   * @param attributeName the name of the attribute to be assigned for tags containing template
+   *        variables
    */
   public ListCommand(String[] templatePaths, String attributeName) {
     this.attributeName = attributeName;

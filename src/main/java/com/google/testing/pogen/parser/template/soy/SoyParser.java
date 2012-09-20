@@ -70,10 +70,10 @@ public class SoyParser extends TemplateParser {
   private static final Pattern CALL_END_PATTERN = Pattern.compile("\\{/call\\}");
 
   /**
-   * Constructs the instance of {@link TemplateParser} with the specified attribute name to be
-   * inserted.
+   * Constructs the instance of {@link TemplateParser} with the specified attribute name.
    * 
-   * @param attributeName the attribute name to be inserted
+   * @param attributeName the name of the attribute to be assigned for tags containing template
+   *        variables
    */
   public SoyParser(String attributeName) {
     super(attributeName);

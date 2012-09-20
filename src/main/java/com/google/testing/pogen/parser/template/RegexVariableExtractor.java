@@ -69,7 +69,7 @@ public abstract class RegexVariableExtractor extends SAXParser {
    */
   private String lastText;
   /**
-   * A string of attribute name for memorizing the attribute value in tags.
+   * A name of the attribute to be assigned for tags containing template variables.
    */
   private String attributeName;
 
@@ -78,7 +78,8 @@ public abstract class RegexVariableExtractor extends SAXParser {
    * parts and the given attribute name for memorizing the value.
    * 
    * @param excludedRanges the {@link RangeSet} with the positions of excluded parts
-   * @param attributeName the string of attribute name for memorizing the attribute value in tags
+   * @param attributeName the name of the attribute to be assigned for tags containing template
+   *        variables
    * @throws TemplateParseException if the specified template is in bad format
    */
   public RegexVariableExtractor(RangeSet<Integer> excludedRanges, String attributeName)

@@ -44,15 +44,17 @@ public class MeasureCommand extends Command {
    */
   private final boolean verbose;
   /**
-   * An attribute name to be inserted.
+   * A name of the attribute to be assigned for tags containing template variables.
    */
   private final String attributeName;
 
   /**
-   * Constructs an instance with the specified template paths.
+   * Constructs an instance with the specified template paths, the specified attribute name and the
+   * boolean of the vebose mode.
    * 
    * @param templatePaths the template paths to be parsed
-   * @param attributeName the attribute name to be inserted
+   * @param attributeName the name of the attribute to be assigned for tags containing template
+   *        variables
    * @param verbose the boolean whether prints processed files verbosely
    */
   public MeasureCommand(String[] templatePaths, String attributeName, boolean verbose) {

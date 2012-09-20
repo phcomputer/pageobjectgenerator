@@ -14,10 +14,11 @@ public class TemplateParsers {
 
   /**
    * Returns the preferred {@link TemplateParser} instance for the specified path of the template
-   * file and the given attribute name to be parsed.
+   * file and the given attribute name.
    * 
    * @param templatePath the path of the template file to be find
-   * @param attributeName the attribute name to be inserted
+   * @param attributeName the name of the attribute to be assigned for tags containing template
+   *        variables
    * @return the preferred {@link TemplateParser} instance
    */
   public static TemplateParser getPreferredParser(String templatePath, String attributeName) {

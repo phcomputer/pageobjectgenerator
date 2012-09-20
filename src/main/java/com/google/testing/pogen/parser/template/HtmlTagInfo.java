@@ -25,7 +25,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 
 /**
- * A class to contain the information of a html tag such as its location, its specific attribute
+ * A class to contain the information of a html tag such as its location, its assigned attribute
  * value and template variables which it contains. The instance of this class is used to retrieve
  * template variables on the html tag unit.
  * 
@@ -43,7 +43,7 @@ public class HtmlTagInfo {
    */
   private final int endIndex;
   /**
-   * A specific attribute value of this tag. This is null if this html tag has no attribute. Note
+   * An assigned attribute value of this tag. This is null if this html tag has no attribute. Note
    * that the variable extractor chooses attributes to memorize.
    */
   private String attributeValue;
@@ -53,11 +53,11 @@ public class HtmlTagInfo {
   private final Map<String, VariableInfo> variables;
 
   /**
-   * Constructs an instance with the specific attribute value, the specified start and the specified
+   * Constructs an instance with the assigned attribute value, the specified start and the specified
    * end positions. Note that when a template variable has no parent html tag, this class assumes it
    * has a virtual root html tag and {@code startIndex} and {@code endIndex} should be -1.
    * 
-   * @param attributeValue the specific attribute value of this tag
+   * @param attributeValue the assigned attribute value of this tag
    * @param startIndex the start position of this tag
    * @param endIndex the end position of this tag
    */
@@ -129,10 +129,10 @@ public class HtmlTagInfo {
   }
 
   /**
-   * Returns {@code true} if this html tag has the specific attribute. Note that the variable
+   * Returns {@code true} if this html tag has the assigned attribute. Note that the variable
    * extractor chooses attributes to memorize.
    * 
-   * @return {@code true} if this html tag has the specific attribute
+   * @return {@code true} if this html tag has the assigned attribute
    */
   public boolean hasAttributeValue() {
     return attributeValue != null;

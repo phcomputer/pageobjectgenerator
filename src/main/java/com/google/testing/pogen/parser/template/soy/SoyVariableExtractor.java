@@ -33,7 +33,8 @@ public class SoyVariableExtractor extends RegexVariableExtractor {
    * parts and the given attribute name for memorizing the value.
    * 
    * @param excludedRanges a {@link RangeSet} with the positions of excluded parts
-   * @param attributeName a string of attribute name for memorizing the attribute value in tags
+   * @param attributeName the name of the attribute to be assigned for tags containing template
+   *        variables
    * @throws TemplateParseException if the specified template is in bad format
    */
   public SoyVariableExtractor(RangeSet<Integer> excludedRanges, String attributeName)

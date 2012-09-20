@@ -35,7 +35,7 @@ import com.google.testing.pogen.parser.template.soy.SoyParser;
  * @author Kazunori Sakamoto
  */
 @RunWith(JUnit4.class)
-public class TestCodeGeneratorTest {
+public class TestCodeGeneratorWithoutClassAttributeTest {
 
   private static final String CLASS_HEAD =
       "public class TestPage extends AbstractPage {\n"
@@ -58,19 +58,21 @@ public class TestCodeGeneratorTest {
           + "import org.openqa.selenium.WebElement;\n"
           + "import org.openqa.selenium.support.FindBy;\n"
           + "import org.openqa.selenium.support.How;\n\n"
-          + "import java.util.ArrayList;\n\n"
+          + "import java.util.ArrayList;\n"
+          + "import java.util.List;\n\n"
           + CLASS_HEAD;
   private static final String TAIL = CLASS_TAIL;
 
   private TemplateUpdater updater;
   private SoyParser parser;
-  private TestCodeGenerator pageObjectGenerator;
+  private TestCodeGenerator generator;
 
   @Before
   public void setUp() {
-    updater = TemplateUpdaters.getPreferredUpdater("id", "_");
-    parser = new SoyParser("id");
-    pageObjectGenerator = new TestCodeGenerator("  ", "\n");
+    String attributeName = "id";
+    updater = TemplateUpdaters.getPreferredUpdater(attributeName, "_");
+    parser = new SoyParser(attributeName);
+    generator = TestCodeGenerators.getPreferredGenerator(attributeName, "  ", "\n");
   }
 
   @Test
@@ -78,9 +80,9 @@ public class TestCodeGeneratorTest {
     TemplateInfo templateInfo =
         parser.parse("<html><head><title>{$title}</title></head><body>test</body></html>");
     updater.generate(templateInfo);
-    String actual = pageObjectGenerator.generate(templateInfo, "", "Test");
+    String actual = generator.generate(templateInfo, "", "Test");
     String expected = HEAD
-        + "  @FindBy(how = How.ID, using = \"_0\")\n"
+        + "  @FindBy(how = How.XPATH, using = \"//*[@id='_0']\")\n"
         + "  private WebElement title;\n\n"
         + "  public WebElement getElementForTitle() {\n"
         + "    return title;\n"
@@ -95,9 +97,9 @@ public class TestCodeGeneratorTest {
   public void generateForAnEnclosure2() throws TemplateParseException {
     TemplateInfo templateInfo = parser.parse("<html><body>{$content}</body></html>");
     updater.generate(templateInfo);
-    String actual = pageObjectGenerator.generate(templateInfo, "", "Test");
+    String actual = generator.generate(templateInfo, "", "Test");
     String expected = HEAD
-        + "  @FindBy(how = How.ID, using = \"_0\")\n"
+        + "  @FindBy(how = How.XPATH, using = \"//*[@id='_0']\")\n"
         + "  private WebElement content;\n\n"
         + "  public WebElement getElementForContent() {\n"
         + "    return content;\n"
@@ -113,9 +115,9 @@ public class TestCodeGeneratorTest {
     TemplateInfo templateInfo =
         parser.parse("<html><head><title>{$p.title}</title></head><body>test</body></html>");
     updater.generate(templateInfo);
-    String actual = pageObjectGenerator.generate(templateInfo, "", "Test");
+    String actual = generator.generate(templateInfo, "", "Test");
     String expected = HEAD
-        + "  @FindBy(how = How.ID, using = \"_0\")\n"
+        + "  @FindBy(how = How.XPATH, using = \"//*[@id='_0']\")\n"
         + "  private WebElement p_title;\n\n"
         + "  public WebElement getElementForP_title() {\n"
         + "    return p_title;\n"
@@ -132,9 +134,9 @@ public class TestCodeGeneratorTest {
         parser
         .parse("<html><head><title>{$title|escapeUri}</title></head><body>test</body></html>");
     updater.generate(templateInfo);
-    String actual = pageObjectGenerator.generate(templateInfo, "", "Test");
+    String actual = generator.generate(templateInfo, "", "Test");
     String expected = HEAD
-        + "  @FindBy(how = How.ID, using = \"_0\")\n"
+        + "  @FindBy(how = How.XPATH, using = \"//*[@id='_0']\")\n"
         + "  private WebElement title;\n\n"
         + "  public WebElement getElementForTitle() {\n"
         + "    return title;\n"
@@ -149,11 +151,11 @@ public class TestCodeGeneratorTest {
   public void generateForAnEnclosureContainingTwoDiffVars() throws TemplateParseException {
     TemplateInfo templateInfo = parser.parse("<html><body>{$content1}{$content2}</body></html>");
     updater.generate(templateInfo);
-    String actual = pageObjectGenerator.generate(templateInfo, "", "Test");
+    String actual = generator.generate(templateInfo, "", "Test");
     String expected = HEAD
-        + "  @FindBy(how = How.ID, using = \"_0\")\n"
+        + "  @FindBy(how = How.XPATH, using = \"//*[@id='_0']\")\n"
         + "  private WebElement content1;\n"
-        + "  @FindBy(how = How.ID, using = \"_0\")\n"
+        + "  @FindBy(how = How.XPATH, using = \"//*[@id='_0']\")\n"
         + "  private WebElement content2;\n\n"
         + "  public WebElement getElementForContent1() {\n"
         + "    return content1;\n"
@@ -174,9 +176,9 @@ public class TestCodeGeneratorTest {
   public void generateForAnEnclosureContainingTwoSameVars() throws TemplateParseException {
     TemplateInfo templateInfo = parser.parse("<html><body>{$content}{$content}</body></html>");
     updater.generate(templateInfo);
-    String actual = pageObjectGenerator.generate(templateInfo, "", "Test");
+    String actual = generator.generate(templateInfo, "", "Test");
     String expected = HEAD
-        + "  @FindBy(how = How.ID, using = \"_0\")\n"
+        + "  @FindBy(how = How.XPATH, using = \"//*[@id='_0']\")\n"
         + "  private WebElement content;\n\n"
         + "  public WebElement getElementForContent() {\n"
         + "    return content;\n"
@@ -191,11 +193,11 @@ public class TestCodeGeneratorTest {
     TemplateInfo templateInfo =
         parser.parse("<html><body><p>{$content}<p>{$content}</body></html>");
     updater.generate(templateInfo);
-    String actual = pageObjectGenerator.generate(templateInfo, "", "Test");
+    String actual = generator.generate(templateInfo, "", "Test");
     String expected = HEAD
-        + "  @FindBy(how = How.ID, using = \"_0\")\n"
+        + "  @FindBy(how = How.XPATH, using = \"//*[@id='_0']\")\n"
         + "  private WebElement content;\n"
-        + "  @FindBy(how = How.ID, using = \"_1\")\n"
+        + "  @FindBy(how = How.XPATH, using = \"//*[@id='_1']\")\n"
         + "  private WebElement content2;\n\n"
         + "  public WebElement getElementForContent() {\n"
         + "    return content;\n"
@@ -218,11 +220,11 @@ public class TestCodeGeneratorTest {
     TemplateInfo templateInfo =
         parser.parse("<html><body attr='{$content1}'>{$content2}</body></html>");
     updater.generate(templateInfo);
-    String actual = pageObjectGenerator.generate(templateInfo, "", "Test");
+    String actual = generator.generate(templateInfo, "", "Test");
     String expected = HEAD
-        + "  @FindBy(how = How.ID, using = \"_0\")\n"
+        + "  @FindBy(how = How.XPATH, using = \"//*[@id='_0']\")\n"
         + "  private WebElement content1;\n"
-        + "  @FindBy(how = How.ID, using = \"_0\")\n"
+        + "  @FindBy(how = How.XPATH, using = \"//*[@id='_0']\")\n"
         + "  private WebElement content2;\n\n"
         + "  public WebElement getElementForContent1() {\n"
         + "    return content1;\n"
@@ -243,9 +245,9 @@ public class TestCodeGeneratorTest {
   public void generateForDistantEnclosures() throws TemplateParseException {
     TemplateInfo templateInfo = parser.parse("<html><body><p></p>{$content}</body></html>");
     updater.generate(templateInfo);
-    String actual = pageObjectGenerator.generate(templateInfo, "", "Test");
+    String actual = generator.generate(templateInfo, "", "Test");
     String expected = HEAD
-        + "  @FindBy(how = How.ID, using = \"_0\")\n"
+        + "  @FindBy(how = How.XPATH, using = \"//*[@id='_0']\")\n"
         + "  private WebElement content;\n\n"
         + "  public WebElement getElementForContent() {\n"
         + "    return content;\n"
@@ -261,9 +263,9 @@ public class TestCodeGeneratorTest {
     TemplateInfo templateInfo =
         parser.parse("<html><body id='content'><p></p>{$content}</body></html>");
     updater.generate(templateInfo);
-    String actual = pageObjectGenerator.generate(templateInfo, "", "Test");
+    String actual = generator.generate(templateInfo, "", "Test");
     String expected = HEAD
-        + "  @FindBy(how = How.ID, using = \"content\")\n"
+        + "  @FindBy(how = How.XPATH, using = \"//*[@id='content']\")\n"
         + "  private WebElement content;\n\n"
         + "  public WebElement getElementForContent() {\n"
         + "    return content;\n"
@@ -279,9 +281,9 @@ public class TestCodeGeneratorTest {
     TemplateInfo templateInfo =
         parser.parse("<html><body id='content'><p></p><p>{$content}</p></body></html>");
     updater.generate(templateInfo);
-    String actual = pageObjectGenerator.generate(templateInfo, "", "Test");
+    String actual = generator.generate(templateInfo, "", "Test");
     String expected = HEAD
-        + "  @FindBy(how = How.ID, using = \"_0\")\n"
+        + "  @FindBy(how = How.XPATH, using = \"//*[@id='_0']\")\n"
         + "  private WebElement content;\n\n"
         + "  public WebElement getElementForContent() {\n"
         + "    return content;\n"
@@ -297,14 +299,14 @@ public class TestCodeGeneratorTest {
     TemplateInfo templateInfo =
         parser.parse("<html><p>{$content}</p><p>{$content}{$content2}</p></body></html>");
     updater.generate(templateInfo);
-    String actual = pageObjectGenerator.generate(templateInfo, "", "Test");
+    String actual = generator.generate(templateInfo, "", "Test");
     // TODO(kazuu): Deal with conflicted fileds and methods.
     String expected = HEAD
-        + "  @FindBy(how = How.ID, using = \"_0\")\n"
+        + "  @FindBy(how = How.XPATH, using = \"//*[@id='_0']\")\n"
         + "  private WebElement content;\n"
-        + "  @FindBy(how = How.ID, using = \"_1\")\n"
+        + "  @FindBy(how = How.XPATH, using = \"//*[@id='_1']\")\n"
         + "  private WebElement content2;\n"
-        + "  @FindBy(how = How.ID, using = \"_1\")\n"
+        + "  @FindBy(how = How.XPATH, using = \"//*[@id='_1']\")\n"
         + "  private WebElement content2;\n\n"
         + "  public WebElement getElementForContent() {\n"
         + "    return content;\n"
@@ -331,9 +333,9 @@ public class TestCodeGeneratorTest {
   public void treatVariableInAttribute() throws TemplateParseException {
     TemplateInfo templateInfo = parser.parse("<html><body><a href='{$url}'></a></body></html>");
     updater.generate(templateInfo);
-    String actual = pageObjectGenerator.generate(templateInfo, "", "Test");
+    String actual = generator.generate(templateInfo, "", "Test");
     String expected = HEAD
-        + "  @FindBy(how = How.ID, using = \"_0\")\n"
+        + "  @FindBy(how = How.XPATH, using = \"//*[@id='_0']\")\n"
         + "  private WebElement url;\n\n"
         + "  public WebElement getElementForUrl() {\n"
         + "    return url;\n"
@@ -349,9 +351,9 @@ public class TestCodeGeneratorTest {
     TemplateInfo templateInfo =
         parser.parse("<html><body><a href='{$url}'>{$url}</a></body></html>");
     updater.generate(templateInfo);
-    String actual = pageObjectGenerator.generate(templateInfo, "", "Test");
+    String actual = generator.generate(templateInfo, "", "Test");
     String expected = HEAD
-        + "  @FindBy(how = How.ID, using = \"_0\")\n"
+        + "  @FindBy(how = How.XPATH, using = \"//*[@id='_0']\")\n"
         + "  private WebElement url;\n\n"
         + "  public WebElement getElementForUrl() {\n"
         + "    return url;\n"
@@ -370,26 +372,26 @@ public class TestCodeGeneratorTest {
     TemplateInfo templateInfo =
         parser.parse("<html>{foreach $url in $urls}<a href='{$url}'>{$url}</a>{/foreach}</html>");
     updater.generate(templateInfo);
-    String actual = pageObjectGenerator.generate(templateInfo, "", "Test");
+    String actual = generator.generate(templateInfo, "", "Test");
     // TODO(kazuu): Don't use the same id attribute for one more html tags
     String expected = HEAD + "\n"
         + "  public List<WebElement> getElementsForUrl() {\n"
         + "    List<WebElement> result = new ArrayList<WebElement>();\n"
-        + "    for (WebElement e : driver.findElements(By.id(\"_0\"))) {\n"
+        + "    for (WebElement e : driver.findElements(By.xpath(\"//*[@id='_0']\"))) {\n"
         + "      result.add(e);\n"
         + "    }\n"
         + "    return result;\n"
         + "  }\n\n"
         + "  public List<String> getTextsForUrl() {\n"
         + "    List<String> result = new ArrayList<String>();\n"
-        + "    for (WebElement e : driver.findElements(By.id(\"_0\"))) {\n"
+        + "    for (WebElement e : driver.findElements(By.xpath(\"//*[@id='_0']\"))) {\n"
         + "      result.add(e.getText());\n"
         + "    }\n"
         + "    return result;\n"
         + "  }\n\n"
         + "  public List<String> getHrefAttributesForUrl() {\n"
         + "    List<String> result = new ArrayList<String>();\n"
-        + "    for (WebElement e : driver.findElements(By.id(\"_0\"))) {\n"
+        + "    for (WebElement e : driver.findElements(By.xpath(\"//*[@id='_0']\"))) {\n"
         + "      result.add(e.getAttribute(\"href\"));\n"
         + "    }\n"
         + "    return result;\n"
@@ -402,9 +404,9 @@ public class TestCodeGeneratorTest {
     TemplateInfo templateInfo =
         parser.parse("<html>{call .t1}{$v1}{/call}<a>{$v2}</a></html>");
     updater.generate(templateInfo);
-    String actual = pageObjectGenerator.generate(templateInfo, "", "Test");
+    String actual = generator.generate(templateInfo, "", "Test");
     String expected = HEAD
-        + "  @FindBy(how = How.ID, using = \"_0\")\n"
+        + "  @FindBy(how = How.XPATH, using = \"//*[@id='_0']\")\n"
         + "  private WebElement v2;\n\n"
         + "  public WebElement getElementForV2() {\n"
         + "    return v2;\n"

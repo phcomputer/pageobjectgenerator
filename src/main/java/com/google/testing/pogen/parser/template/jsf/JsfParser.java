@@ -36,10 +36,10 @@ import com.google.testing.pogen.parser.template.TemplateParser;
 public class JsfParser extends TemplateParser {
 
   /**
-   * Constructs the instance of {@link TemplateParser} with the specified attribute name to be
-   * inserted.
+   * Constructs the instance of {@link TemplateParser} with the specified attribute name.
    * 
-   * @param attributeName the attribute name to be inserted
+   * @param attributeName the name of the attribute to be assigned for tags containing template
+   *        variables
    */
   public JsfParser(String attributeName) {
     super(attributeName);

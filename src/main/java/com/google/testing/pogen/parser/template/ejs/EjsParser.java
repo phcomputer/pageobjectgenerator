@@ -45,10 +45,10 @@ public class EjsParser extends TemplateParser {
   private static final Pattern FOR_END_PATTERN = Pattern.compile("<%\\s*}");
 
   /**
-   * Constructs the instance of {@link TemplateParser} with the specified attribute name to be
-   * inserted.
+   * Constructs the instance of {@link TemplateParser} with the specified attribute name.
    * 
-   * @param attributeName the attribute name to be inserted
+   * @param attributeName the name of the attribute to be assigned for tags containing template
+   *        variables
    */
   public EjsParser(String attributeName) {
     super(attributeName);

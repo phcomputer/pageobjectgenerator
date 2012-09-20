@@ -67,7 +67,7 @@ public class PageObjectGenerator {
     // @formatter:off
     Options options = new Options()
         .addOption(OptionBuilder
-            .withDescription("Attribute name to be inserted (default is 'id').")
+            .withDescription("Attribute name to be assigned in tagas containing template variables (default is 'id').")
             .hasArg()
             .create('a'))
         .addOption(OptionBuilder

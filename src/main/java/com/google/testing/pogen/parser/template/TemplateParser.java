@@ -34,15 +34,15 @@ import com.google.common.collect.Ranges;
 public abstract class TemplateParser {
 
   /**
-   * An attribute name to be inserted.
+   * A name of the attribute to be assigned for tags containing template variables.
    */
   protected final String attributeName;
 
   /**
-   * Constructs the instance of {@link TemplateParser} with the specified attribute name to be
-   * inserted.
+   * Constructs the instance of {@link TemplateParser} with the specified attribute name.
    * 
-   * @param attributeName the attribute name to be inserted
+   * @param attributeName the name of the attribute to be assigned for tags containing template
+   *        variables
    */
   public TemplateParser(String attributeName) {
     this.attributeName = attributeName;
@@ -52,7 +52,6 @@ public abstract class TemplateParser {
    * Retrieves the information of the specified template by parsing it.
    * 
    * @param template the string of the template to be parsed
-   * @param attributeName the attribute name to be inserted
    * @return the information of the specified template
    * @throws TemplateParseException if the specified template is in bad format
    */

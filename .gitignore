@@ -36,3 +36,4 @@ download
 .settings
 .classpath
 .project
+*.swp

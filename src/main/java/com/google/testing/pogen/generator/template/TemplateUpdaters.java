@@ -11,14 +11,14 @@ public class TemplateUpdaters {
   private TemplateUpdaters() {}
 
   /**
-   * Returns the preferred {@link TemplateParser} instance for the specified attribute name to be
-   * inserted.
+   * Returns the preferred {@link TemplateParser} instance for the specified attribute name.
    * 
-   * @param attributeName the attribute name to be inserted
+   * @param attributeName the name of the attribute to be assigned for tags containing template
+   *        variables
    * @return the preferred {@link TemplateParser} instance
    */
   public static TemplateUpdater getPreferredUpdater(String attributeName) {
-    if (attributeName.endsWith("class")) {
+    if (attributeName.equals("class")) {
       return new TemplateUpdaterWithClassAttribute();
     } else {
       return new TemplateUpdaterWithoutClassAttribute(attributeName);
@@ -26,15 +26,15 @@ public class TemplateUpdaters {
   }
 
   /**
-   * Returns the preferred {@link TemplateParser} instance for the specified attribute name to be
-   * inserted.
+   * Returns the preferred {@link TemplateParser} instance for the specified attribute name.
    * 
-   * @param attributeName the attribute name to be inserted
+   * @param attributeName the name of the attribute to be assigned for tags containing template
+   *        variables
    * @return the preferred {@link TemplateParser} instance
    */
   public static TemplateUpdater getPreferredUpdater(String attributeName,
       String attributeValuePrefix) {
-    if (attributeName.endsWith("class")) {
+    if (attributeName.equals("class")) {
       return new TemplateUpdaterWithClassAttribute(attributeValuePrefix);
     } else {
       return new TemplateUpdaterWithoutClassAttribute(attributeName, attributeValuePrefix);

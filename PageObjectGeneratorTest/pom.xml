@@ -8,11 +8,11 @@
   </parent>
 
   <groupId>java.com.google</groupId>
-  <artifactId>PageObjectGenerator</artifactId>
-  <version>1.1.1</version>
+  <artifactId>PageObjectGeneratorTest</artifactId>
+  <version>1.1.0</version>
   <packaging>jar</packaging>
  
-  <name>PageObjectGenerator</name>
+  <name>PageObjectGeneratorTest</name>
   <description>PageObjectGenerator is a testing tool to generate skeleton test code designed by the PageObject pattern for WebDriver from html template files.</description>
   <url>http://code.google.com/p/pageobjectgenerator/</url>
   <inceptionYear>2011</inceptionYear>
@@ -109,6 +109,12 @@
       <version>1.9.0</version> 
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.seleniumhq.selenium</groupId>
+      <artifactId>selenium-java</artifactId>
+      <version>2.25.0</version>
+      <scope>test</scope>
+    </dependency>  
   </dependencies>
 
   <build>

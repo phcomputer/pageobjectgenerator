@@ -18,7 +18,6 @@ package com.google.testing.pogen.generator.test.java;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import com.google.common.collect.HashMultiset;
 import com.google.testing.pogen.generator.test.PageObjectUpdateException;
 import com.google.testing.pogen.parser.template.HtmlTagInfo;
@@ -31,7 +30,7 @@ import com.google.testing.pogen.parser.template.VariableInfo;
  * 
  * @author Kazunori Sakamoto
  */
-public class TestCodeGenerator {
+public abstract class TestCodeGenerator {
   /**
    * A string to indicate the start of generated fields and getter methods.
    */
@@ -60,6 +59,9 @@ public class TestCodeGenerator {
 
   /**
    * Constructs an instance with the specified indent and the specified new-line strings.
+   * 
+   * @param indent the string of indent for generating source code
+   * @param newLine the string of new line for generating source code
    */
   public TestCodeGenerator(String indent, String newLine) {
     this.indent = indent;
@@ -67,7 +69,7 @@ public class TestCodeGenerator {
   }
 
   /**
-   * Generates skeleton test code with getter methods for html elements, texts and attributes to
+   * Generates skeleton test code with getter methods for html tags, texts and attributes to
    * retrieve values of variables from Selenium2.
    * 
    * @param templateInfo the {@link TemplateInfo} of the template whose skeleton test code we want
@@ -96,6 +98,7 @@ public class TestCodeGenerator {
     appendLine(builder, 0, "import org.openqa.selenium.support.How;");
     appendLine(builder);
     appendLine(builder, 0, "import java.util.ArrayList;");
+    appendLine(builder, 0, "import java.util.List;");
     appendLine(builder);
 
     appendLine(builder, 0, String.format("public class %sPage extends AbstractPage {", className));
@@ -117,8 +120,8 @@ public class TestCodeGenerator {
   }
 
   /**
-   * Updates existing test code with getter methods for html elements, texts and attributes to
-   * retrieve the values of the variables from Selenium2.
+   * Updates existing test code with getter methods for html tags, texts and attributes to retrieve
+   * the values of the variables from Selenium2.
    * 
    * @param templateInfo the {@link TemplateInfo} of the template whose skeleton test code we want
    *        to generate
@@ -144,7 +147,7 @@ public class TestCodeGenerator {
   }
 
   /**
-   * Appends the body of skeleton test code, that is, only html element fields and getter methods to
+   * Appends the body of skeleton test code, that is, only html tag fields and getter methods to
    * retrieve the values of the variables into the given string builder.
    * 
    * @param builder {@link StringBuilder} the generated test code will be appended to
@@ -166,7 +169,7 @@ public class TestCodeGenerator {
         continue;
       }
 
-      String id = tagInfo.getAttributeValue();
+      String attrValue = tagInfo.getAttributeValue();
       boolean isRepeated = templateInfo.isRepeated(tagInfo);
 
       for (VariableInfo varInfo : tagInfo.getVariableInfos()) {
@@ -176,12 +179,12 @@ public class TestCodeGenerator {
         int varIndex = varNameCounter.count(varInfo.getName());
         String newVarName = varInfo.getName() + convertToString(varIndex);
 
-        appendElementGetter(builder, methodBuilder, newVarName, id, isRepeated);
+        appendElementGetter(builder, methodBuilder, newVarName, attrValue, isRepeated);
         if (varInfo.isContainedByText()) {
-          appendTextGetter(methodBuilder, newVarName, id, isRepeated);
+          appendTextGetter(methodBuilder, newVarName, attrValue, isRepeated);
         }
         for (String attrName : varInfo.getSortedAttributeNames()) {
-          appendAttributeGetter(methodBuilder, newVarName, attrName, id, isRepeated);
+          appendAttributeGetter(methodBuilder, newVarName, attrName, attrValue, isRepeated);
         }
       }
     }
@@ -190,79 +193,77 @@ public class TestCodeGenerator {
   }
 
   /**
-   * Appends a getter method and also a field if needed for the html element which contains the
-   * variable specified by the name into the given string builder.
+   * Appends a getter method and also a field if needed for the html tag which contains the variable
+   * specified by the name into the given string builder.
    * 
    * @param fieldBuilder {@link StringBuilder} the generated field will be appended to
    * @param methodBuilder {@link StringBuilder} the generated method will be appended to
    * @param variableName the variable name
-   * @param id the id value assigned to the field
+   * @param assignedAttributeValue the attribute value assigned to the html tag
    * @param isRepeated the boolean whether the specified html tag appears in a repeated part
    */
   private void appendElementGetter(StringBuilder fieldBuilder, StringBuilder methodBuilder,
-      String variableName, String id, boolean isRepeated) {
+      String variableName, String assignedAttributeValue, boolean isRepeated) {
     if (!isRepeated) {
-      appendField(fieldBuilder, variableName, id);
+      appendField(fieldBuilder, variableName, assignedAttributeValue);
       appendGetter(methodBuilder, variableName, "", "WebElement", "ElementFor");
     } else {
-      appendListGetter(methodBuilder, variableName, "", "WebElement", "ElementsFor", id);
+      appendListGetter(methodBuilder, variableName, "", "WebElement", "ElementsFor",
+          assignedAttributeValue);
     }
   }
 
   /**
-   * Appends a getter method for the text of html element which contains the variable specified by
+   * Appends a getter method for the text of html tag which contains the variable specified by the
+   * name into the given string builder.
+   * 
+   * @param methodBuilder {@link StringBuilder} the generated method will be appended to
+   * @param variableName the variable name
+   * @param assignedAttributeValue the attribute value assigned to the html tag
+   * @param isRepeated the boolean whether the specified html tag appears in a repeated part
+   */
+  private void appendTextGetter(StringBuilder methodBuilder, String variableName,
+      String assignedAttributeValue, boolean isRepeated) {
+    if (!isRepeated) {
+      appendGetter(methodBuilder, variableName, ".getText()", "String", "TextFor");
+    } else {
+      appendListGetter(methodBuilder, variableName, ".getText()", "String", "TextsFor",
+          assignedAttributeValue);
+    }
+  }
+
+  /**
+   * Appends a getter method for the attribute of html tag which contains the variable specified by
    * the name into the given string builder.
    * 
    * @param methodBuilder {@link StringBuilder} the generated method will be appended to
    * @param variableName the variable name
-   * @param id the id value assigned to the field
-   * @param isRepeated the boolean whether the specified html tag appears in a repeated part
-   */
-  private void appendTextGetter(StringBuilder methodBuilder, String variableName, String id,
-      boolean isRepeated) {
-    if (!isRepeated) {
-      appendGetter(methodBuilder, variableName, ".getText()", "String", "TextFor");
-    } else {
-      appendListGetter(methodBuilder, variableName, ".getText()", "String", "TextsFor", id);
-    }
-  }
-
-  /**
-   * Appends a getter method for the attribute of html element which contains the variable specified
-   * by the name into the given string builder.
-   * 
-   * @param methodBuilder {@link StringBuilder} the generated method will be appended to
-   * @param variableName the variable name
    * @param attributeName the name of the attribute which contains template variables
-   * @param id the id value assigned to the field
+   * @param assignedAttributeValue the attribute value assigned to the html tag
    * @param isRepeated the boolean whether the specified html tag appears in a repeated part
    */
   private void appendAttributeGetter(StringBuilder methodBuilder, String variableName,
-      String attributeName, String id, boolean isRepeated) {
+      String attributeName, String assignedAttributeValue, boolean isRepeated) {
     if (!isRepeated) {
       appendGetter(methodBuilder, variableName, ".getAttribute(\"" + attributeName + "\")",
           "String", StringUtils.capitalize(attributeName) + "AttributeFor");
     } else {
       appendListGetter(methodBuilder, variableName, ".getAttribute(\"" + attributeName + "\")",
-          "String", StringUtils.capitalize(attributeName) + "AttributesFor", id);
+          "String", StringUtils.capitalize(attributeName) + "AttributesFor", assignedAttributeValue);
     }
   }
 
   /**
-   * Appends a private field for accessing the html element which has the specified id value and
-   * contains the variable specified by the name with {@literal @FindBy(how = How.ID, ...)} into the
-   * given string builder.
+   * Appends a private field for accessing the html tag which has the specified attribute value and
+   * contains the variable specified by the name with {@literal @FindBy(how = How.XPATH , ...)} into
+   * the given string builder.
    * 
    * @param builder {@link StringBuilder} the generated test code will be appended to
    * @param variableName the variable name
-   * @param id the id value assigned to the field
+   * @param assignedAttributeValue the attribute value assigned to the html tag
    */
-  private void appendField(StringBuilder builder, String variableName, String id) {
-    Preconditions.checkArgument(!Strings.isNullOrEmpty(id));
-
-    appendLine(builder, 1, String.format("@FindBy(how = How.ID, using = \"%s\")", id));
-    appendLine(builder, 1, String.format("private WebElement %s;", variableName));
-  }
+  protected abstract void appendField(StringBuilder builder, String variableName,
+      String assignedAttributeValue);
 
   /**
    * Appends a getter method for the variable specified by the name or the result of invoking the
@@ -298,30 +299,15 @@ public class TestCodeGenerator {
    * @param builder {@link StringBuilder} the generated test code will be appended to
    * @param variableName the variable name
    * @param elementSuffixForInvoking the suffix of the {@code WebElement} variable that specifies a
-   *        method name with a dot to invoke it, e.g. {@literal".getText()"}, or an empty string to
+   *        method name with a dot to invoke it, e.g. {@literal ".getText()"}, or an empty string to
    *        access the variable directly.
    * @param returnType the return type of the generated getter method
    * @param methodNamePrefix the name prefix of the generated method
-   * @param id the id value assigned to the field
+   * @param assignedAttributeValue the attribute value assigned to the html tag
    */
-  private void appendListGetter(StringBuilder builder, String variableName,
-      String elementSuffixForInvoking, String returnType, String methodNamePrefix, String id) {
-    appendLine(builder);
-    // TODO(kazuu): Help to select proper one from getFoo, getFoo2, getFoo3 ...
-    appendLine(
-        builder,
-        1,
-        String.format("public List<%s> get%s%s() {", returnType, methodNamePrefix,
-            StringUtils.capitalize(variableName)));
-    appendLine(builder, 2,
-        String.format("List<%s> result = new ArrayList<%s>();", returnType, returnType));
-    appendLine(builder, 2,
-        String.format("for (WebElement e : driver.findElements(By.id(\"%s\"))) {", id));
-    appendLine(builder, 3, String.format("result.add(e%s);", elementSuffixForInvoking));
-    appendLine(builder, 2, "}");
-    appendLine(builder, 2, "return result;");
-    appendLine(builder, 1, "}");
-  }
+  protected abstract void appendListGetter(StringBuilder builder, String variableName,
+      String elementSuffixForInvoking, String returnType, String methodNamePrefix,
+      String assignedAttributeValue);
 
   /**
    * Converts the specified number to a string. Results an empty string if the number is 1.
@@ -339,7 +325,7 @@ public class TestCodeGenerator {
    * 
    * @param builder the string builder to be appended a new-line character
    */
-  private void appendLine(StringBuilder builder) {
+  protected void appendLine(StringBuilder builder) {
     builder.append(newLine);
   }
 
@@ -351,7 +337,7 @@ public class TestCodeGenerator {
    * @param indentCount the number of indent string to be appended at the beginning of the line
    * @param line the line string to be be appended into the builder
    */
-  private void appendLine(StringBuilder builder, int indentCount, String line) {
+  protected void appendLine(StringBuilder builder, int indentCount, String line) {
     for (int i = 0; i < indentCount; i++) {
       builder.append(indent);
     }

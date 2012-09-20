@@ -26,13 +26,16 @@ import com.google.testing.pogen.parser.template.TemplateInfo;
  */
 class TemplateUpdaterWithoutClassAttribute extends TemplateUpdater {
   /**
-   * A attribute name to be inserted.
+   * A name of the attribute to be assigned for tags containing template variables.
    */
   private final String attributeName;
 
   /**
    * Constructs an instance with the specified attribute name and the default prefix of a generating
    * attribute value.
+   * 
+   * @param attributeName the name of the attribute to be assigned for tags containing template
+   *        variables
    */
   TemplateUpdaterWithoutClassAttribute(String attributeName) {
     super();
@@ -43,6 +46,8 @@ class TemplateUpdaterWithoutClassAttribute extends TemplateUpdater {
    * Constructs an instance with the specified attribute name and the given prefix of a generating
    * attribute value.
    * 
+   * @param attributeName the name of the attribute to be assigned for tags containing template
+   *        variables
    * @param idPrefix the prefix of a new id attribute
    */
   TemplateUpdaterWithoutClassAttribute(String attributeName, String idPrefix) {

@@ -30,6 +30,7 @@ import com.google.testing.pogen.generator.template.TemplateUpdaters;
 import com.google.testing.pogen.generator.test.PageObjectUpdateException;
 import com.google.testing.pogen.generator.test.java.NameConverter;
 import com.google.testing.pogen.generator.test.java.TestCodeGenerator;
+import com.google.testing.pogen.generator.test.java.TestCodeGenerators;
 import com.google.testing.pogen.parser.template.TemplateInfo;
 import com.google.testing.pogen.parser.template.TemplateParseException;
 import com.google.testing.pogen.parser.template.TemplateParser;
@@ -71,18 +72,19 @@ public class GenerateCommand extends Command {
    */
   private final boolean verbose;
   /**
-   * An attribute name to be inserted.
+   * A name of the attribute to be assigned for tags containing template variables.
    */
   private final String attributeName;
 
   /**
-   * Constructs an instance with the specified output-directory path, the specified package name and
-   * the specified template paths.
+   * Constructs an instance with the the specified template paths, specified output-directory path,
+   * the specified package name, the specified attribute name and the boolean of the verbose mode.
    * 
    * @param templatePaths the template paths to be parsed
    * @param testOutDirPath the output directory path of test codes
    * @param packageName the package name to generate skeleton test codes
-   * @param attributeName the attribute name to be inserted
+   * @param attributeName the name of the attribute to be assigned for tags containing template
+   *        variables
    * @param verbose the boolean whether prints processed files verbosely
    */
   public GenerateCommand(String[] templatePaths, String testOutDirPath, String packageName,
@@ -109,16 +111,17 @@ public class GenerateCommand extends Command {
       System.err.println("Already exists: " + newAbstractPageFile.getAbsolutePath() + ".");
     }
 
+    TemplateUpdater updater = TemplateUpdaters.getPreferredUpdater(attributeName);
+    TestCodeGenerator generator = TestCodeGenerators.getPreferredGenerator(attributeName);
     for (String templatePath : templatePaths) {
       File file = createFileFromFilePath(templatePath, true, true);
       try {
         TemplateParser parser = TemplateParsers.getPreferredParser(templatePath, attributeName);
-        TemplateUpdater updater = TemplateUpdaters.getPreferredUpdater(attributeName);
         if (attributeName.equals("id") && parser instanceof JsfParser) {
           System.out
               .println("WARNING: Using id attribute is not recommmended for JSF templat engine.");
         }
-        parseAndGenerate(file, testOutDir, parser, updater);
+        parseAndGenerate(file, testOutDir, parser, updater, generator);
       } catch (TemplateParseException e) {
         throw new FileProcessException("Errors occur in parsing the specified files", file, e);
       } catch (PageObjectUpdateException e) {
@@ -135,13 +138,14 @@ public class GenerateCommand extends Command {
    * @param codeOutDir the output directory of skeleton test code
    * @param parser the parser to parse template files
    * @param updater the updater to update template files
+   * @param generator the generator to generate skeleton test code
    * @throws IOException if errors occur in reading and writing files
    * @throws TemplateParseException if the specified template is in bad format
    * @throws PageObjectUpdateException if the existing test code doesn't have generated code
    */
   private void parseAndGenerate(File templateFile, File codeOutDir, TemplateParser parser,
-      TemplateUpdater updater) throws IOException, TemplateParseException,
-      PageObjectUpdateException {
+      TemplateUpdater updater, TestCodeGenerator generator) throws IOException,
+      TemplateParseException, PageObjectUpdateException {
     Preconditions.checkNotNull(templateFile);
     Preconditions.checkNotNull(codeOutDir);
     Preconditions.checkArgument(!Strings.isNullOrEmpty(packageName));
@@ -165,7 +169,6 @@ public class GenerateCommand extends Command {
       System.out.print(".");
     }
     // Generate skeleton test code
-    TestCodeGenerator pogen = new TestCodeGenerator();
     File codeFile = new File(codeOutDir.getPath(), pageName + "Page.java");
     if (codeFile.exists() && !codeFile.canWrite()) {
       throw new FileProcessException("No permission for writing the specified file", codeFile);
@@ -173,8 +176,8 @@ public class GenerateCommand extends Command {
 
     // @formatter:off
     String testCode =
-        codeFile.exists() ? pogen.update(templateInfo,
-            Files.toString(codeFile, Charset.defaultCharset())) : pogen.generate(templateInfo,
+        codeFile.exists() ? generator.update(templateInfo,
+            Files.toString(codeFile, Charset.defaultCharset())) : generator.generate(templateInfo,
             packageName, pageName);
     // @formatter:on
     if (verbose) {
