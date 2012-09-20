@@ -50,8 +50,8 @@ class TemplateUpdaterWithClassAttribute extends TemplateUpdater {
     tagInfo.setId(generateUniqueId());
     if (tagInfo.hasAttributeValue()) {
       int space = StringUtils.indexOf(tag, ' ');
-      while (true) {
-        int equal = StringUtils.indexOf(tag, '=', space + 1);
+      int equal;
+      while (space > 0 && (equal = StringUtils.indexOf(tag, '=', space + 1)) > 0) {
         String name = tag.substring(space + 1, equal).trim();
         int leftQuote = StringUtils.indexOfAny(tag, '"', '\'');
         if (name.equals("class")) {
