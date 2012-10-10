@@ -98,14 +98,17 @@ public abstract class TestCodeGenerator {
     appendLine(builder, 0, "import org.openqa.selenium.support.How;");
     appendLine(builder);
     appendLine(builder, 0, "import java.util.ArrayList;");
+    appendLine(builder, 0, "import java.util.HashMap;");
     appendLine(builder, 0, "import java.util.List;");
+    appendLine(builder, 0, "import java.util.regex.Matcher;");
+    appendLine(builder, 0, "import java.util.regex.Pattern;");
     appendLine(builder);
 
     appendLine(builder, 0, String.format("public class %sPage extends AbstractPage {", className));
     appendLine(builder, 1, String.format("public %sPage(WebDriver driver) {", className));
-    appendLine(builder, 2, String.format("super(driver);", className));
-    appendLine(builder, 2, String.format("assertInvariant();", className));
-    appendLine(builder, 1, String.format("}", className));
+    appendLine(builder, 2, "super(driver);");
+    appendLine(builder, 2, "assertInvariant();");
+    appendLine(builder, 1, "}");
     appendLine(builder);
 
     appendLine(builder, 1, "private void assertInvariant() {");
@@ -113,6 +116,8 @@ public abstract class TestCodeGenerator {
     appendLine(builder);
 
     appendLine(builder, 1, GENERATED_CODE_START_MARK);
+    appendLine(builder, 1,
+        "private static Pattern commentPattern = Pattern.compile(\"<!--POGEN,([^,]*),([^,]*),(.*?)-->\");");
     appendFieldsAndGetters(builder, templateInfo);
     appendLine(builder, 1, GENERATED_CODE_END_MARK);
     appendLine(builder, 0, "}");
@@ -180,9 +185,7 @@ public abstract class TestCodeGenerator {
         String newVarName = varInfo.getName() + convertToString(varIndex);
 
         appendElementGetter(builder, methodBuilder, newVarName, attrValue, isRepeated);
-        if (varInfo.isContainedByText()) {
-          appendTextGetter(methodBuilder, newVarName, attrValue, isRepeated);
-        }
+        appendTextGetter(methodBuilder, newVarName, tagInfo, varInfo, isRepeated);
         for (String attrName : varInfo.getSortedAttributeNames()) {
           appendAttributeGetter(methodBuilder, newVarName, attrName, attrValue, isRepeated);
         }
@@ -218,18 +221,38 @@ public abstract class TestCodeGenerator {
    * name into the given string builder.
    * 
    * @param methodBuilder {@link StringBuilder} the generated method will be appended to
-   * @param variableName the variable name
-   * @param assignedAttributeValue the attribute value assigned to the html tag
+   * @param uniqueVariableName the unique variable name with a sequential number
+   * @param tagInfo the information of the html tag containing the template variable
+   * @param varInfo the information of the template variable
    * @param isRepeated the boolean whether the specified html tag appears in a repeated part
    */
-  private void appendTextGetter(StringBuilder methodBuilder, String variableName,
-      String assignedAttributeValue, boolean isRepeated) {
-    if (!isRepeated) {
-      appendGetter(methodBuilder, variableName, ".getText()", "String", "TextFor");
-    } else {
-      appendListGetter(methodBuilder, variableName, ".getText()", "String", "TextsFor",
-          assignedAttributeValue);
+  private void appendTextGetter(StringBuilder methodBuilder, String uniqueVariableName,
+      HtmlTagInfo tagInfo, VariableInfo varInfo, boolean isRepeated) {
+    // TODO(kazuu): Help to select proper one from getFoo, getFoo2, getFoo3 ...
+    appendLine(methodBuilder);
+    String methodNamePrefix = !isRepeated ? "String getTextFor" : "List<String> getTextsFor";
+    String foundedProcess =
+        !isRepeated ? "return matcher.group(3);" : "result.add(matcher.group(3));";
+    String finalProcess = !isRepeated ? "return null;" : "return result;";
+    appendLine(
+        methodBuilder,
+        1,
+        String.format("public %s%s() {", methodNamePrefix,
+            StringUtils.capitalize(uniqueVariableName)));
+    if (isRepeated) {
+      appendLine(methodBuilder, 2, "List<String> result = new ArrayList<String>();");
     }
+    appendLine(methodBuilder, 2,
+        "Matcher matcher = commentPattern.matcher(driver.getPageSource());");
+    appendLine(methodBuilder, 2, "while (matcher.find()) {");
+    appendLine(methodBuilder, 3, String.format(
+        "if (matcher.group(1).equals(\"%s\") && matcher.group(2).equals(\"%s\")) {",
+        tagInfo.getAttributeValue(), varInfo.getName()));
+    appendLine(methodBuilder, 4, foundedProcess);
+    appendLine(methodBuilder, 3, "}");
+    appendLine(methodBuilder, 2, "}");
+    appendLine(methodBuilder, 2, finalProcess);
+    appendLine(methodBuilder, 1, "}");
   }
 
   /**

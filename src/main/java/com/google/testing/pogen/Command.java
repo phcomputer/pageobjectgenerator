@@ -38,16 +38,13 @@ public abstract class Command {
    * 
    * @param filePath the path pointing to the existing file whose {@link File} instance we want to
    *        create
-   * @param checkCanRead {@code true} if checks the read permission
-   * @param checkCanWrite {@code true} if checks the write permission
    * @return the {@link File} instance for the file
    * @throws FileNotFoundException if the file does not exist
    * @throws FileProcessException if errors occur in processing the file
    */
-  public File createFileFromFilePath(String filePath, boolean checkCanRead, boolean checkCanWrite)
-      throws FileNotFoundException, FileProcessException {
+  public File createFileFromFilePath(String filePath) throws FileNotFoundException,
+      FileProcessException {
     File file = new File(filePath);
-    checkExistenceAndPermission(file, checkCanRead, checkCanWrite);
     if (!file.isFile()) {
       throw new FileProcessException("The specified path is not a file", file);
     }
@@ -84,7 +81,7 @@ public abstract class Command {
    * @throws FileNotFoundException if the file does not exist
    * @throws FileProcessException if errors occur in processing the directory
    */
-  private void checkExistenceAndPermission(File file, boolean checkCanRead, boolean checkCanWrite)
+  protected void checkExistenceAndPermission(File file, boolean checkCanRead, boolean checkCanWrite)
       throws FileNotFoundException, FileProcessException {
     if (!file.exists()) {
       // @formatter:off

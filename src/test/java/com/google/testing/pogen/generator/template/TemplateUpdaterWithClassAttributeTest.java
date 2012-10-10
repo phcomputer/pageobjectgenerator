@@ -39,7 +39,7 @@ public class TemplateUpdaterWithClassAttributeTest {
     private int idCount = 0;
 
     @Override
-    protected String generateUniqueId() {
+    protected String generateUniqueValue() {
       return "_" + (idCount++);
     }
   }
@@ -62,21 +62,22 @@ public class TemplateUpdaterWithClassAttributeTest {
         updater.generate(parser
             .parse("<html><head><title>{$title}</title></head><body>test</body></html>"));
     String expected =
-        "<html><head><title class=\"_0\">{$title}</title></head><body>test</body></html>";
+        "<html><head><!--POGEN,_0,title,{$title}--><title class=\"_0\">{$title}</title></head><body>test</body></html>";
     assertEquals(expected, actual);
   }
 
   @Test
   public void insertIdIntoEnclosure2() throws TemplateParseException {
     String actual = updater.generate(parser.parse("<html><body>{$content}</body></html>"));
-    String expected = "<html><body class=\"_0\">{$content}</body></html>";
+    String expected =
+        "<html><!--POGEN,_0,content,{$content}--><body class=\"_0\">{$content}</body></html>";
     assertEquals(expected, actual);
   }
 
   @Test
   public void insertIdIntoEnclosureCombiningStartEnd() throws TemplateParseException {
     String actual = updater.generate(parser.parse("<html><img src='{$url}' /></html>"));
-    String expected = "<html><img src='{$url}' class=\"_0\" /></html>";
+    String expected = "<html><!--POGEN,_0,url,{$url}--><img src='{$url}' class=\"_0\" /></html>";
     assertEquals(expected, actual);
   }
 
@@ -84,7 +85,7 @@ public class TemplateUpdaterWithClassAttributeTest {
   public void insertIdIntoEnclosureCombiningStartEndWithRedundantSpace()
       throws TemplateParseException {
     String actual = updater.generate(parser.parse("<html><img src='{$url}'        /></html>"));
-    String expected = "<html><img src='{$url}' class=\"_0\" /></html>";
+    String expected = "<html><!--POGEN,_0,url,{$url}--><img src='{$url}' class=\"_0\" /></html>";
     assertEquals(expected, actual);
   }
 
@@ -94,7 +95,7 @@ public class TemplateUpdaterWithClassAttributeTest {
         updater.generate(parser
             .parse("<html><head><title>{$p.title}</title></head><body>test</body></html>"));
     String expected =
-        "<html><head><title class=\"_0\">{$p.title}</title></head><body>test</body></html>";
+        "<html><head><!--POGEN,_0,p_dot_title,{$p.title}--><title class=\"_0\">{$p.title}</title></head><body>test</body></html>";
     assertEquals(expected, actual);
   }
 
@@ -104,7 +105,7 @@ public class TemplateUpdaterWithClassAttributeTest {
         updater.generate(parser
             .parse("<html><head><title>{$title|escapeUri}</title></head><body>test</body></html>"));
     String expected =
-        "<html><head><title class=\"_0\">{$title|escapeUri}</title></head><body>test</body></html>";
+        "<html><head><!--POGEN,_0,title,{$title|escapeUri}--><title class=\"_0\">{$title|escapeUri}</title></head><body>test</body></html>";
     assertEquals(expected, actual);
   }
 
@@ -112,7 +113,8 @@ public class TemplateUpdaterWithClassAttributeTest {
   public void insertIdIntoEnclosureContainingTwoDiffVars() throws TemplateParseException {
     String actual =
         updater.generate(parser.parse("<html><body>{$content1}{$content2}</body></html>"));
-    String expected = "<html><body class=\"_0\">{$content1}{$content2}</body></html>";
+    String expected =
+        "<html><!--POGEN,_0,content1,{$content1}--><!--POGEN,_0,content2,{$content2}--><body class=\"_0\">{$content1}{$content2}</body></html>";
     assertEquals(expected, actual);
   }
 
@@ -120,7 +122,8 @@ public class TemplateUpdaterWithClassAttributeTest {
   public void insertIdIntoEnclosureContainingTwoSameVars() throws TemplateParseException {
     String actual =
         updater.generate(parser.parse("<html><body>{$content}{$content}</body></html>"));
-    String expected = "<html><body class=\"_0\">{$content}{$content}</body></html>";
+    String expected =
+        "<html><!--POGEN,_0,content,{$content}--><body class=\"_0\">{$content}{$content}</body></html>";
     assertEquals(expected, actual);
   }
 
@@ -129,7 +132,7 @@ public class TemplateUpdaterWithClassAttributeTest {
     String actual =
         updater.generate(parser.parse("<html><body><p>{$content}<p>{$content}</body></html>"));
     String expected =
-        "<html><body><p class=\"_0\">{$content}<p class=\"_1\">{$content}</body></html>";
+        "<html><body><!--POGEN,_0,content,{$content}--><p class=\"_0\">{$content}<!--POGEN,_1,content,{$content}--><p class=\"_1\">{$content}</body></html>";
     assertEquals(expected, actual);
   }
 
@@ -138,14 +141,16 @@ public class TemplateUpdaterWithClassAttributeTest {
       throws TemplateParseException {
     String actual =
         updater.generate(parser.parse("<html><body attr='{$content1}'>{$content2}</body></html>"));
-    String expected = "<html><body attr='{$content1}' class=\"_0\">{$content2}</body></html>";
+    String expected =
+        "<html><!--POGEN,_0,content1,{$content1}--><!--POGEN,_0,content2,{$content2}--><body attr='{$content1}' class=\"_0\">{$content2}</body></html>";
     assertEquals(expected, actual);
   }
 
   @Test
   public void insertIdIntoDistantEnclosures() throws TemplateParseException {
     String actual = updater.generate(parser.parse("<html><body><p></p>{$content}</body></html>"));
-    String expected = "<html><body class=\"_0\"><p></p>{$content}</body></html>";
+    String expected =
+        "<html><!--POGEN,_0,content,{$content}--><body class=\"_0\"><p></p>{$content}</body></html>";
     assertEquals(expected, actual);
   }
 
@@ -154,7 +159,8 @@ public class TemplateUpdaterWithClassAttributeTest {
     String actual =
         updater.generate(parser
             .parse("<html><body class='content'><p></p>{$content}</body></html>"));
-    String expected = "<html><body class='_0 content'><p></p>{$content}</body></html>";
+    String expected =
+        "<html><!--POGEN,_0,content,{$content}--><body class='_0 content'><p></p>{$content}</body></html>";
     assertEquals(expected, actual);
   }
 
@@ -162,7 +168,8 @@ public class TemplateUpdaterWithClassAttributeTest {
   public void treatVariableInAttribute() throws TemplateParseException {
     String actual =
         updater.generate(parser.parse("<html><body><a href='{$url}'></a></body></html>"));
-    String expected = "<html><body><a href='{$url}' class=\"_0\"></a></body></html>";
+    String expected =
+        "<html><body><!--POGEN,_0,url,{$url}--><a href='{$url}' class=\"_0\"></a></body></html>";
     assertEquals(expected, actual);
   }
 
@@ -170,7 +177,8 @@ public class TemplateUpdaterWithClassAttributeTest {
   public void treatVariableInAttributeAndText() throws TemplateParseException {
     String actual =
         updater.generate(parser.parse("<html><body><a href='{$url}'>{$url}</a></body></html>"));
-    String expected = "<html><body><a href='{$url}' class=\"_0\">{$url}</a></body></html>";
+    String expected =
+        "<html><body><!--POGEN,_0,url,{$url}--><a href='{$url}' class=\"_0\">{$url}</a></body></html>";
     assertEquals(expected, actual);
   }
 
@@ -181,7 +189,7 @@ public class TemplateUpdaterWithClassAttributeTest {
         updater.generate(parser
             .parse("<html>{foreach $url in $urls}<a href='{$url}'>{$url}</a>{/foreach}</html>"));
     String expected =
-        "<html>{foreach $url in $urls}<a href='{$url}' class=\"_0\">{$url}</a>{/foreach}</html>";
+        "<html>{foreach $url in $urls}<!--POGEN,_0,url,{$url}--><a href='{$url}' class=\"_0\">{$url}</a>{/foreach}</html>";
     assertEquals(expected, actual);
   }
 }

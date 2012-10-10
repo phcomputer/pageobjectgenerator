@@ -10,7 +10,10 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.How;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class IndexPage extends AbstractPage {
   public IndexPage(WebDriver driver) {
@@ -22,6 +25,7 @@ public class IndexPage extends AbstractPage {
   }
 
   /* ------------------- GENERATED CODE START ------------------- */
+  private static Pattern commentPattern = Pattern.compile("<!--POGEN,([^,]*),([^,]*),(.*?)-->");
   @FindBy(how = How.XPATH, using = "//*[@lang='__pogen_0']")
   private WebElement title;
   @FindBy(how = How.XPATH, using = "//*[@lang='__pogen_1']")
@@ -36,7 +40,13 @@ public class IndexPage extends AbstractPage {
   }
 
   public String getTextForTitle() {
-    return title.getText();
+    Matcher matcher = commentPattern.matcher(driver.getPageSource());
+    while (matcher.find()) {
+      if (matcher.group(1).equals("__pogen_0") && matcher.group(2).equals("title")) {
+        return matcher.group(3);
+      }
+    }
+    return null;
   }
 
   public WebElement getElementForValue() {
@@ -44,7 +54,13 @@ public class IndexPage extends AbstractPage {
   }
 
   public String getTextForValue() {
-    return value.getText();
+    Matcher matcher = commentPattern.matcher(driver.getPageSource());
+    while (matcher.find()) {
+      if (matcher.group(1).equals("__pogen_1") && matcher.group(2).equals("value")) {
+        return matcher.group(3);
+      }
+    }
+    return null;
   }
 
   public WebElement getElementForValue2() {
@@ -52,7 +68,13 @@ public class IndexPage extends AbstractPage {
   }
 
   public String getTextForValue2() {
-    return value2.getText();
+    Matcher matcher = commentPattern.matcher(driver.getPageSource());
+    while (matcher.find()) {
+      if (matcher.group(1).equals("__pogen_2") && matcher.group(2).equals("value2")) {
+        return matcher.group(3);
+      }
+    }
+    return null;
   }
 
   public WebElement getElementForValue3() {
@@ -60,7 +82,13 @@ public class IndexPage extends AbstractPage {
   }
 
   public String getTextForValue3() {
-    return value3.getText();
+    Matcher matcher = commentPattern.matcher(driver.getPageSource());
+    while (matcher.find()) {
+      if (matcher.group(1).equals("test3") && matcher.group(2).equals("value3")) {
+        return matcher.group(3);
+      }
+    }
+    return null;
   }
 
   public List<WebElement> getElementsForValue4() {
@@ -73,10 +101,13 @@ public class IndexPage extends AbstractPage {
 
   public List<String> getTextsForValue4() {
     List<String> result = new ArrayList<String>();
-    for (WebElement e : driver.findElements(By.xpath("//*[@lang='__pogen_3']"))) {
-      result.add(e.getText());
+    Matcher matcher = commentPattern.matcher(driver.getPageSource());
+    while (matcher.find()) {
+      if (matcher.group(1).equals("__pogen_3") && matcher.group(2).equals("value4")) {
+        result.add(matcher.group(3));
+      }
     }
     return result;
   }
-/* -------------------- GENERATED CODE END -------------------- */
+  /* -------------------- GENERATED CODE END -------------------- */
 }

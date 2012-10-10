@@ -24,6 +24,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.testing.pogen.parser.template.HtmlTagInfo;
 import com.google.testing.pogen.parser.template.TemplateInfo;
+import com.google.testing.pogen.parser.template.VariableInfo;
 
 /**
  * A class to modify the template from the specified {@link TemplateInfo} instance.
@@ -32,13 +33,17 @@ import com.google.testing.pogen.parser.template.TemplateInfo;
  */
 public abstract class TemplateUpdater {
   /**
+   * A prefix of a generating comment.
+   */
+  private static final String commentPrefix = "POGEN";
+  /**
    * A prefix of a generating attribute value.
    */
   private final String attributeValuePrefix;
   /**
    * A unique number to generate new attribute values.
    */
-  private int idCount = 0;
+  private int valueCount = 0;
 
   /**
    * Constructs an instance with the default prefix of a generating attribute value.
@@ -96,7 +101,14 @@ public abstract class TemplateUpdater {
 
       // Build a modified tag containing template variables
       StringBuilder tag = buildModifiedTag(template, tagInfo);
+      for (VariableInfo varInfo : tagInfo.getVariableInfos()) {
+        newTemplate.append("<!--" + commentPrefix + "," + tagInfo.getAttributeValue() + ","
+            + varInfo.getName() + "," + varInfo.getPrintCommandText() + "-->");
+      }
       newTemplate.append(tag);
+
+      // <!--POGEN,-->
+      // tagInfo.getAttributeValue()
     }
     // Add the rest part of the template
     newTemplate.append(template.subSequence(lastIndex, template.length()));
@@ -119,7 +131,7 @@ public abstract class TemplateUpdater {
    * @return the generated unique attribute value
    */
   @VisibleForTesting
-  protected String generateUniqueId() {
-    return attributeValuePrefix + (idCount++);
+  protected String generateUniqueValue() {
+    return attributeValuePrefix + (valueCount++);
   }
 }

@@ -137,7 +137,8 @@ public abstract class RegexVariableExtractor extends SAXParser {
       Matcher matcher = variablePattern.matcher(attrs.getValue(i));
       while (matcher.find()) {
         if (!excludedRanges.contains(matcher.start(1))) {
-          tagInfo.addVariableInfo(matcher.group(1), matcher.start(1), attrs.getQName(i));
+          tagInfo.addVariableInfo(matcher.group(0), matcher.group(1), matcher.start(1),
+              attrs.getQName(i));
         }
       }
     }
@@ -167,7 +168,7 @@ public abstract class RegexVariableExtractor extends SAXParser {
       // because NekoHTML add <html> tag as a root element automatically
       // Note that tags automatically added have -1 start/end indexes
       HtmlTagInfo tagInfo = tagInfoStack.peek();
-      tagInfo.addVariableInfo(matcher.group(1), matcher.start(1));
+      tagInfo.addVariableInfo(matcher.group(0), matcher.group(1), matcher.start(1));
     }
     lastText = "";
   }

@@ -91,7 +91,19 @@ public class PageObjectGenerator {
               .withDescription("Output directory of generating skeleton test code.")
               .hasArg()
               .isRequired()
-              .create('o'));
+              .create('o'))
+          .addOption(OptionBuilder
+              .withDescription("Root input directory of html template files.")
+              .hasArg()
+              .isRequired()
+              .create('i'))
+          .addOption(OptionBuilder
+              .withDescription("Regex for finding html template files.")
+              .hasArg()
+              .create('e'))
+          .addOption(OptionBuilder
+              .withDescription("Option for finding html template files recursively.")
+              .create('r'));
       // @formatter:on
       helpMessage =
           "java PageObjectGenerator generate -o <test_out_dir> -p <package_name>"
@@ -111,22 +123,27 @@ public class PageObjectGenerator {
     HelpFormatter f = new HelpFormatter();
     try {
       CommandLine cl = cmdParser.parse(options, Arrays.copyOfRange(args, 1, args.length));
+      if (cl.hasOption('h')) {
+        f.printHelp(helpMessage, options);
+        return;
+      }
+
       Command command = null;
       String[] templatePaths = cl.getArgs();
       String attributeName = cl.getOptionValue('a');
       attributeName = attributeName != null ? attributeName : "id";
       if (commandName.equals(GENERATE_COMMAND)) {
+        String rootDirectoryPath = cl.getOptionValue('i');
+        String templateFilePattern = cl.getOptionValue('e');
+        boolean isRecusive = cl.hasOption('r');
         command =
             new GenerateCommand(templatePaths, cl.getOptionValue('o'), cl.getOptionValue('p'),
-                attributeName, cl.hasOption('v'));
+                attributeName, cl.hasOption('v'), rootDirectoryPath, templateFilePattern,
+                isRecusive);
       } else if (commandName.equals(MEASURE_COMMAND)) {
         command = new MeasureCommand(templatePaths, attributeName, cl.hasOption('v'));
       } else if (commandName.equals(LIST_COMMAND)) {
         command = new ListCommand(templatePaths, attributeName);
-      }
-      if (cl.hasOption('h') || templatePaths.length == 0) {
-        f.printHelp(helpMessage, options);
-        return;
       }
       try {
         command.execute();

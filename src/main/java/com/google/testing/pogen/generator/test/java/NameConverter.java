@@ -34,6 +34,19 @@ public class NameConverter {
   private NameConverter() {}
 
   /**
+   * Converts the specified text with signs to a string without signs by translating signs into
+   * texts.
+   * 
+   * @param textWithSigns
+   * @return the specified text with signs to a string without signs by translating signs into texts
+   */
+  public static String replaceSignsToTexts(String textWithSigns) {
+    String[] signs = new String[] {"+", "-", "*", "/", "."};
+    String[] texts = new String[] {"_plus_", "_minus_", "_multiply_", "_divide_", "_dot_"};
+    return StringUtils.replaceEach(textWithSigns, signs, texts);
+  }
+
+  /**
    * Converts the specified file name to a Java class name.
    * 
    * @param fileName the file name to be converted

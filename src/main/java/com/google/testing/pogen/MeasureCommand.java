@@ -69,7 +69,8 @@ public class MeasureCommand extends Command {
     for (String templatePath : templatePaths) {
       TemplateParser templateParser =
           TemplateParsers.getPreferredParser(templatePath, attributeName);
-      File templateFile = createFileFromFilePath(templatePath, true, false);
+      File templateFile = createFileFromFilePath(templatePath);
+      checkExistenceAndPermission(templateFile, true, false);
       String template = Files.toString(templateFile, Charset.defaultCharset());
       try {
         VariableCoverage result = VariableCoverageMeasurer.measure(templateParser.parse(template));

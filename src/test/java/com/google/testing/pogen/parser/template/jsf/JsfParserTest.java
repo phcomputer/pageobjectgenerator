@@ -47,7 +47,7 @@ public class JsfParserTest {
   public void testParseVariables() throws TemplateParseException {
     String template = "<h:outputText id='id' value='value' rendered='#{empty}'/>#{obj.name}#{' '}";
     List<String> actual = ParserTestUtil.getCommands(parser, template);
-    List<String> expected = Arrays.asList("empty", "obj_name");
+    List<String> expected = Arrays.asList("empty", "obj_dot_name");
     assertEquals(expected, actual);
   }
 
@@ -55,7 +55,7 @@ public class JsfParserTest {
   public void testParseExpressionss() throws TemplateParseException {
     String template = "#{obj.name + 'a'}#{' '}";
     List<String> actual = ParserTestUtil.getCommands(parser, template);
-    List<String> expected = Arrays.asList("obj_name____a_");
+    List<String> expected = Arrays.asList("obj_dot_name__plus___a_");
     assertEquals(expected, actual);
   }
 }

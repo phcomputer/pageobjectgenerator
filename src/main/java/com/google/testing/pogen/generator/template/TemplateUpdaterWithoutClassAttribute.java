@@ -68,7 +68,7 @@ class TemplateUpdaterWithoutClassAttribute extends TemplateUpdater {
     if (tagInfo.hasAttributeValue()) {
       return tag;
     }
-    tagInfo.setId(generateUniqueId());
+    tagInfo.setAttributeValue(generateUniqueValue());
     // Deal with closed tag such as <br />
     int insertIndex = tag.length() - 2;
     String tail = ">";

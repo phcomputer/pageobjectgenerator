@@ -17,9 +17,15 @@ package com.google.testing.pogen;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.io.filefilter.RegexFileFilter;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -75,6 +81,18 @@ public class GenerateCommand extends Command {
    * A name of the attribute to be assigned for tags containing template variables.
    */
   private final String attributeName;
+  /**
+   * A path of root directory which contains html template files.
+   */
+  private String rootDirectoryPath;
+  /**
+   * A pattern for finding template files in the root directory.
+   */
+  private String templateFilePattern;
+  /**
+   * A boolean whether template files are recursively found.
+   */
+  private boolean isRecusive;
 
   /**
    * Constructs an instance with the the specified template paths, specified output-directory path,
@@ -86,19 +104,32 @@ public class GenerateCommand extends Command {
    * @param attributeName the name of the attribute to be assigned for tags containing template
    *        variables
    * @param verbose the boolean whether prints processed files verbosely
+   * @param rootDirectoryPath the root directory of html template files
+   * @param templateFilePattern the pattern for finding template files in the root directory
+   * @param isRecusive the boolean whether template files are recursively found
    */
   public GenerateCommand(String[] templatePaths, String testOutDirPath, String packageName,
-      String attributeName, boolean verbose) {
+      String attributeName, boolean verbose, String rootDirectoryPath, String templateFilePattern,
+      boolean isRecusive) {
     this.templatePaths = Arrays.copyOf(templatePaths, templatePaths.length);
     this.testOutDirPath = testOutDirPath;
     this.packageName = packageName;
     this.attributeName = attributeName;
     this.verbose = verbose;
+    this.rootDirectoryPath = rootDirectoryPath;
+    this.templateFilePattern = templateFilePattern;
+    this.isRecusive = isRecusive;
   }
 
   @Override
   public void execute() throws IOException {
+    File rootInputDir = createDirectory(rootDirectoryPath, false, true);
     File testOutDir = createDirectory(testOutDirPath, false, true);
+
+    // Check whether the root directory exists
+    if (!rootInputDir.exists()) {
+      throw new FileProcessException("Not found root intpu directory", rootInputDir);
+    }
 
     // Generate the AbstractPage class
     File newAbstractPageFile = new File(testOutDir.getPath(), ABSTRACT_PAGE_NAME);
@@ -111,17 +142,30 @@ public class GenerateCommand extends Command {
       System.err.println("Already exists: " + newAbstractPageFile.getAbsolutePath() + ".");
     }
 
+    // Collect the template files from the arguments indicating paths of template files
+    ArrayList<File> templateFiles = new ArrayList<File>();
+    for (String templatePath : templatePaths) {
+      File file = createFileFromFilePath(templatePath);
+      templateFiles.add(file);
+    }
+
+    // Collect the template files from the specified pattern with the root directory
+    if (!Strings.isNullOrEmpty(templateFilePattern)) {
+      templateFiles.addAll(FileUtils.listFiles(rootInputDir, new RegexFileFilter(
+          templateFilePattern), isRecusive ? FileFilterUtils.trueFileFilter() : null));
+    }
+
     TemplateUpdater updater = TemplateUpdaters.getPreferredUpdater(attributeName);
     TestCodeGenerator generator = TestCodeGenerators.getPreferredGenerator(attributeName);
-    for (String templatePath : templatePaths) {
-      File file = createFileFromFilePath(templatePath, true, true);
+    for (File file : templateFiles) {
+      checkExistenceAndPermission(file, true, true);
       try {
-        TemplateParser parser = TemplateParsers.getPreferredParser(templatePath, attributeName);
+        TemplateParser parser = TemplateParsers.getPreferredParser(file.getPath(), attributeName);
         if (attributeName.equals("id") && parser instanceof JsfParser) {
           System.out
               .println("WARNING: Using id attribute is not recommmended for JSF templat engine.");
         }
-        parseAndGenerate(file, testOutDir, parser, updater, generator);
+        parseAndGenerate(file, rootInputDir, testOutDir, parser, updater, generator);
       } catch (TemplateParseException e) {
         throw new FileProcessException("Errors occur in parsing the specified files", file, e);
       } catch (PageObjectUpdateException e) {
@@ -135,6 +179,7 @@ public class GenerateCommand extends Command {
    * code.
    * 
    * @param templateFile the template file to be modified
+   * @param rootInputDir the root input directory of template files
    * @param codeOutDir the output directory of skeleton test code
    * @param parser the parser to parse template files
    * @param updater the updater to update template files
@@ -143,10 +188,11 @@ public class GenerateCommand extends Command {
    * @throws TemplateParseException if the specified template is in bad format
    * @throws PageObjectUpdateException if the existing test code doesn't have generated code
    */
-  private void parseAndGenerate(File templateFile, File codeOutDir, TemplateParser parser,
-      TemplateUpdater updater, TestCodeGenerator generator) throws IOException,
-      TemplateParseException, PageObjectUpdateException {
+  private void parseAndGenerate(File templateFile, File rootInputDir, File codeOutDir,
+      TemplateParser parser, TemplateUpdater updater, TestCodeGenerator generator)
+      throws IOException, TemplateParseException, PageObjectUpdateException {
     Preconditions.checkNotNull(templateFile);
+    Preconditions.checkNotNull(rootInputDir);
     Preconditions.checkNotNull(codeOutDir);
     Preconditions.checkArgument(!Strings.isNullOrEmpty(packageName));
     Preconditions.checkNotNull(parser);
@@ -168,17 +214,30 @@ public class GenerateCommand extends Command {
     if (verbose) {
       System.out.print(".");
     }
+
+    // Construct path of skeleton test code
+    URI relativeDirUri = rootInputDir.toURI().relativize(templateFile.getParentFile().toURI());
+    String relativeDirPath = relativeDirUri.toString();
+    if (relativeDirPath.endsWith("/")) {
+      relativeDirPath = relativeDirPath.substring(0, relativeDirPath.length() - 1);
+    }
+    if (!Strings.isNullOrEmpty(relativeDirPath)) {
+      relativeDirPath = File.separatorChar + relativeDirPath;
+    }
+    String packagePrefix = relativeDirPath.replace('/', '.');
+    File actualDir = new File(codeOutDir.getPath() + relativeDirPath);
+    actualDir.mkdirs();
+
     // Generate skeleton test code
-    File codeFile = new File(codeOutDir.getPath(), pageName + "Page.java");
+    File codeFile = new File(actualDir, pageName + "Page.java");
     if (codeFile.exists() && !codeFile.canWrite()) {
       throw new FileProcessException("No permission for writing the specified file", codeFile);
     }
 
     // @formatter:off
-    String testCode =
-        codeFile.exists() ? generator.update(templateInfo,
-            Files.toString(codeFile, Charset.defaultCharset())) : generator.generate(templateInfo,
-            packageName, pageName);
+    String testCode = codeFile.exists()
+        ? generator.update(templateInfo, Files.toString(codeFile, Charset.defaultCharset()))
+        : generator.generate(templateInfo, packageName + packagePrefix, pageName);
     // @formatter:on
     if (verbose) {
       System.out.print(".");

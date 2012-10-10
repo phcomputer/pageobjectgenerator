@@ -45,9 +45,12 @@ public class TestCodeGeneratorWithClassAttributeTest {
           + "  }\n\n"
           + "  private void assertInvariant() {\n"
           + "  }\n\n"
-          + "  /* ------------------- GENERATED CODE START ------------------- */\n";
+          + "  /* ------------------- GENERATED CODE START ------------------- */\n"
+          + "  private static Pattern commentPattern = Pattern.compile(\"<!--POGEN,([^,]*),([^,]*),(.*?)-->\");\n"
+          ;
   private static final String CLASS_TAIL = "\n"
-      + "  /* -------------------- GENERATED CODE END -------------------- */\n}\n";
+      + "  /* -------------------- GENERATED CODE END -------------------- */\n}\n"
+      ;
 
   private static final String HEAD =
       "package ;\n\n"
@@ -59,8 +62,12 @@ public class TestCodeGeneratorWithClassAttributeTest {
           + "import org.openqa.selenium.support.FindBy;\n"
           + "import org.openqa.selenium.support.How;\n\n"
           + "import java.util.ArrayList;\n"
-          + "import java.util.List;\n\n"
-          + CLASS_HEAD;
+          + "import java.util.HashMap;\n"
+          + "import java.util.List;\n"
+          + "import java.util.regex.Matcher;\n"
+          + "import java.util.regex.Pattern;\n\n"
+          + CLASS_HEAD
+          ;
   private static final String TAIL = CLASS_TAIL;
 
   private TemplateUpdater updater;
@@ -88,7 +95,13 @@ public class TestCodeGeneratorWithClassAttributeTest {
         + "    return title;\n"
         + "  }\n\n"
         + "  public String getTextForTitle() {\n"
-        + "    return title.getText();\n"
+        + "    Matcher matcher = commentPattern.matcher(driver.getPageSource());\n"
+        + "    while (matcher.find()) {\n"
+        + "      if (matcher.group(1).equals(\"_0\") && matcher.group(2).equals(\"title\")) {\n"
+        + "        return matcher.group(3);\n"
+        + "      }\n"
+        + "    }\n"
+        + "    return null;\n"
         + "  }" + TAIL;
     assertEquals(expected, actual);
   }
@@ -105,7 +118,13 @@ public class TestCodeGeneratorWithClassAttributeTest {
         + "    return content;\n"
         + "  }\n\n"
         + "  public String getTextForContent() {\n"
-        + "    return content.getText();\n"
+        + "    Matcher matcher = commentPattern.matcher(driver.getPageSource());\n"
+        + "    while (matcher.find()) {\n"
+        + "      if (matcher.group(1).equals(\"_0\") && matcher.group(2).equals(\"content\")) {\n"
+        + "        return matcher.group(3);\n"
+        + "      }\n"
+        + "    }\n"
+        + "    return null;\n"
         + "  }" + TAIL;
     assertEquals(expected, actual);
   }
@@ -118,12 +137,18 @@ public class TestCodeGeneratorWithClassAttributeTest {
     String actual = generator.generate(templateInfo, "", "Test");
     String expected = HEAD
         + "  @FindBy(how = How.CSS, using = \"._0\")\n"
-        + "  private WebElement p_title;\n\n"
-        + "  public WebElement getElementForP_title() {\n"
-        + "    return p_title;\n"
+        + "  private WebElement p_dot_title;\n\n"
+        + "  public WebElement getElementForP_dot_title() {\n"
+        + "    return p_dot_title;\n"
         + "  }\n\n"
-        + "  public String getTextForP_title() {\n"
-        + "    return p_title.getText();\n"
+        + "  public String getTextForP_dot_title() {\n"
+        + "    Matcher matcher = commentPattern.matcher(driver.getPageSource());\n"
+        + "    while (matcher.find()) {\n"
+        + "      if (matcher.group(1).equals(\"_0\") && matcher.group(2).equals(\"p_dot_title\")) {\n"
+        + "        return matcher.group(3);\n"
+        + "      }\n"
+        + "    }\n"
+        + "    return null;\n"
         + "  }" + TAIL;
     assertEquals(expected, actual);
   }
@@ -142,7 +167,13 @@ public class TestCodeGeneratorWithClassAttributeTest {
         + "    return title;\n"
         + "  }\n\n"
         + "  public String getTextForTitle() {\n"
-        + "    return title.getText();\n"
+        + "    Matcher matcher = commentPattern.matcher(driver.getPageSource());\n"
+        + "    while (matcher.find()) {\n"
+        + "      if (matcher.group(1).equals(\"_0\") && matcher.group(2).equals(\"title\")) {\n"
+        + "        return matcher.group(3);\n"
+        + "      }\n"
+        + "    }\n"
+        + "    return null;\n"
         + "  }" + TAIL;
     assertEquals(expected, actual);
   }
@@ -161,13 +192,25 @@ public class TestCodeGeneratorWithClassAttributeTest {
         + "    return content1;\n"
         + "  }\n\n"
         + "  public String getTextForContent1() {\n"
-        + "    return content1.getText();\n"
+        + "    Matcher matcher = commentPattern.matcher(driver.getPageSource());\n"
+        + "    while (matcher.find()) {\n"
+        + "      if (matcher.group(1).equals(\"_0\") && matcher.group(2).equals(\"content1\")) {\n"
+        + "        return matcher.group(3);\n"
+        + "      }\n"
+        + "    }\n"
+        + "    return null;\n"
         + "  }\n\n"
         + "  public WebElement getElementForContent2() {\n"
         + "    return content2;\n"
         + "  }\n\n"
         + "  public String getTextForContent2() {\n"
-        + "    return content2.getText();\n"
+        + "    Matcher matcher = commentPattern.matcher(driver.getPageSource());\n"
+        + "    while (matcher.find()) {\n"
+        + "      if (matcher.group(1).equals(\"_0\") && matcher.group(2).equals(\"content2\")) {\n"
+        + "        return matcher.group(3);\n"
+        + "      }\n"
+        + "    }\n"
+        + "    return null;\n"
         + "  }" + TAIL;
     assertEquals(expected, actual);
   }
@@ -184,7 +227,14 @@ public class TestCodeGeneratorWithClassAttributeTest {
         + "    return content;\n"
         + "  }\n\n"
         + "  public String getTextForContent() {\n"
-        + "    return content.getText();\n  }" + TAIL;
+        + "    Matcher matcher = commentPattern.matcher(driver.getPageSource());\n"
+        + "    while (matcher.find()) {\n"
+        + "      if (matcher.group(1).equals(\"_0\") && matcher.group(2).equals(\"content\")) {\n"
+        + "        return matcher.group(3);\n"
+        + "      }\n"
+        + "    }\n"
+        + "    return null;\n"
+        + "  }" + TAIL;
     assertEquals(expected, actual);
   }
 
@@ -203,13 +253,25 @@ public class TestCodeGeneratorWithClassAttributeTest {
         + "    return content;\n"
         + "  }\n\n"
         + "  public String getTextForContent() {\n"
-        + "    return content.getText();\n"
+        + "    Matcher matcher = commentPattern.matcher(driver.getPageSource());\n"
+        + "    while (matcher.find()) {\n"
+        + "      if (matcher.group(1).equals(\"_0\") && matcher.group(2).equals(\"content\")) {\n"
+        + "        return matcher.group(3);\n"
+        + "      }\n"
+        + "    }\n"
+        + "    return null;\n"
         + "  }\n\n"
         + "  public WebElement getElementForContent2() {\n"
         + "    return content2;\n"
         + "  }\n\n"
         + "  public String getTextForContent2() {\n"
-        + "    return content2.getText();\n"
+        + "    Matcher matcher = commentPattern.matcher(driver.getPageSource());\n"
+        + "    while (matcher.find()) {\n"
+        + "      if (matcher.group(1).equals(\"_1\") && matcher.group(2).equals(\"content\")) {\n"
+        + "        return matcher.group(3);\n"
+        + "      }\n"
+        + "    }\n"
+        + "    return null;\n"
         + "  }" + TAIL;
     assertEquals(expected, actual);
   }
@@ -229,6 +291,15 @@ public class TestCodeGeneratorWithClassAttributeTest {
         + "  public WebElement getElementForContent1() {\n"
         + "    return content1;\n"
         + "  }\n\n"
+        + "  public String getTextForContent1() {\n"
+        + "    Matcher matcher = commentPattern.matcher(driver.getPageSource());\n"
+        + "    while (matcher.find()) {\n"
+        + "      if (matcher.group(1).equals(\"_0\") && matcher.group(2).equals(\"content1\")) {\n"
+        + "        return matcher.group(3);\n"
+        + "      }\n"
+        + "    }\n"
+        + "    return null;\n"
+        + "  }\n\n"
         + "  public String getAttrAttributeForContent1() {\n"
         + "    return content1.getAttribute(\"attr\");\n"
         + "  }\n\n"
@@ -236,7 +307,13 @@ public class TestCodeGeneratorWithClassAttributeTest {
         + "    return content2;\n"
         + "  }\n\n"
         + "  public String getTextForContent2() {\n"
-        + "    return content2.getText();\n"
+        + "    Matcher matcher = commentPattern.matcher(driver.getPageSource());\n"
+        + "    while (matcher.find()) {\n"
+        + "      if (matcher.group(1).equals(\"_0\") && matcher.group(2).equals(\"content2\")) {\n"
+        + "        return matcher.group(3);\n"
+        + "      }\n"
+        + "    }\n"
+        + "    return null;\n"
         + "  }" + TAIL;
     assertEquals(expected, actual);
   }
@@ -253,8 +330,15 @@ public class TestCodeGeneratorWithClassAttributeTest {
         + "    return content;\n"
         + "  }\n\n"
         + "  public String getTextForContent() {\n"
-        + "    return content.getText();\n"
-        + "  }" + TAIL;
+        + "    Matcher matcher = commentPattern.matcher(driver.getPageSource());\n"
+        + "    while (matcher.find()) {\n"
+        + "      if (matcher.group(1).equals(\"_0\") && matcher.group(2).equals(\"content\")) {\n"
+        + "        return matcher.group(3);\n"
+        + "      }\n"
+        + "    }\n"
+        + "    return null;\n"
+        + "  }"
+        + TAIL;
     assertEquals(expected, actual);
   }
 
@@ -271,8 +355,15 @@ public class TestCodeGeneratorWithClassAttributeTest {
         + "    return content;\n"
         + "  }\n\n"
         + "  public String getTextForContent() {\n"
-        + "    return content.getText();\n"
-        + "  }" + TAIL;
+        + "    Matcher matcher = commentPattern.matcher(driver.getPageSource());\n"
+        + "    while (matcher.find()) {\n"
+        + "      if (matcher.group(1).equals(\"_0\") && matcher.group(2).equals(\"content\")) {\n"
+        + "        return matcher.group(3);\n"
+        + "      }\n"
+        + "    }\n"
+        + "    return null;\n"
+        + "  }"
+        + TAIL;
     assertEquals(expected, actual);
   }
 
@@ -289,7 +380,13 @@ public class TestCodeGeneratorWithClassAttributeTest {
         + "    return content;\n"
         + "  }\n\n"
         + "  public String getTextForContent() {\n"
-        + "    return content.getText();\n"
+        + "    Matcher matcher = commentPattern.matcher(driver.getPageSource());\n"
+        + "    while (matcher.find()) {\n"
+        + "      if (matcher.group(1).equals(\"_0\") && matcher.group(2).equals(\"content\")) {\n"
+        + "        return matcher.group(3);\n"
+        + "      }\n"
+        + "    }\n"
+        + "    return null;\n"
         + "  }" + TAIL;
     assertEquals(expected, actual);
   }
@@ -312,19 +409,37 @@ public class TestCodeGeneratorWithClassAttributeTest {
         + "    return content;\n"
         + "  }\n\n"
         + "  public String getTextForContent() {\n"
-        + "    return content.getText();\n"
+        + "    Matcher matcher = commentPattern.matcher(driver.getPageSource());\n"
+        + "    while (matcher.find()) {\n"
+        + "      if (matcher.group(1).equals(\"_0\") && matcher.group(2).equals(\"content\")) {\n"
+        + "        return matcher.group(3);\n"
+        + "      }\n"
+        + "    }\n"
+        + "    return null;\n"
         + "  }\n\n"
         + "  public WebElement getElementForContent2() {\n"
         + "    return content2;\n"
         + "  }\n\n"
         + "  public String getTextForContent2() {\n"
-        + "    return content2.getText();\n"
+        + "    Matcher matcher = commentPattern.matcher(driver.getPageSource());\n"
+        + "    while (matcher.find()) {\n"
+        + "      if (matcher.group(1).equals(\"_1\") && matcher.group(2).equals(\"content\")) {\n"
+        + "        return matcher.group(3);\n"
+        + "      }\n"
+        + "    }\n"
+        + "    return null;\n"
         + "  }\n\n"
         + "  public WebElement getElementForContent2() {\n"
         + "    return content2;\n"
         + "  }\n\n"
         + "  public String getTextForContent2() {\n"
-        + "    return content2.getText();\n"
+        + "    Matcher matcher = commentPattern.matcher(driver.getPageSource());\n"
+        + "    while (matcher.find()) {\n"
+        + "      if (matcher.group(1).equals(\"_1\") && matcher.group(2).equals(\"content2\")) {\n"
+        + "        return matcher.group(3);\n"
+        + "      }\n"
+        + "    }\n"
+        + "    return null;\n"
         + "  }" + TAIL;
     assertEquals(expected, actual);
   }
@@ -339,6 +454,15 @@ public class TestCodeGeneratorWithClassAttributeTest {
         + "  private WebElement url;\n\n"
         + "  public WebElement getElementForUrl() {\n"
         + "    return url;\n"
+        + "  }\n\n"
+        + "  public String getTextForUrl() {\n"
+        + "    Matcher matcher = commentPattern.matcher(driver.getPageSource());\n"
+        + "    while (matcher.find()) {\n"
+        + "      if (matcher.group(1).equals(\"_0\") && matcher.group(2).equals(\"url\")) {\n"
+        + "        return matcher.group(3);\n"
+        + "      }\n"
+        + "    }\n"
+        + "    return null;\n"
         + "  }\n\n"
         + "  public String getHrefAttributeForUrl() {\n"
         + "    return url.getAttribute(\"href\");\n"
@@ -359,7 +483,13 @@ public class TestCodeGeneratorWithClassAttributeTest {
         + "    return url;\n"
         + "  }\n\n"
         + "  public String getTextForUrl() {\n"
-        + "    return url.getText();\n"
+        + "    Matcher matcher = commentPattern.matcher(driver.getPageSource());\n"
+        + "    while (matcher.find()) {\n"
+        + "      if (matcher.group(1).equals(\"_0\") && matcher.group(2).equals(\"url\")) {\n"
+        + "        return matcher.group(3);\n"
+        + "      }\n"
+        + "    }\n"
+        + "    return null;\n"
         + "  }\n\n"
         + "  public String getHrefAttributeForUrl() {\n"
         + "    return url.getAttribute(\"href\");\n"
@@ -384,8 +514,11 @@ public class TestCodeGeneratorWithClassAttributeTest {
         + "  }\n\n"
         + "  public List<String> getTextsForUrl() {\n"
         + "    List<String> result = new ArrayList<String>();\n"
-        + "    for (WebElement e : driver.findElements(By.cssSelector(\"._0\"))) {\n"
-        + "      result.add(e.getText());\n"
+        + "    Matcher matcher = commentPattern.matcher(driver.getPageSource());\n"
+        + "    while (matcher.find()) {\n"
+        + "      if (matcher.group(1).equals(\"_0\") && matcher.group(2).equals(\"url\")) {\n"
+        + "        result.add(matcher.group(3));\n"
+        + "      }\n"
         + "    }\n"
         + "    return result;\n"
         + "  }\n\n"
@@ -412,7 +545,13 @@ public class TestCodeGeneratorWithClassAttributeTest {
         + "    return v2;\n"
         + "  }\n\n"
         + "  public String getTextForV2() {\n"
-        + "    return v2.getText();\n"
+        + "    Matcher matcher = commentPattern.matcher(driver.getPageSource());\n"
+        + "    while (matcher.find()) {\n"
+        + "      if (matcher.group(1).equals(\"_0\") && matcher.group(2).equals(\"v2\")) {\n"
+        + "        return matcher.group(3);\n"
+        + "      }\n"
+        + "    }\n"
+        + "    return null;\n"
         + "  }" + TAIL;
     assertEquals(expected, actual);
   }

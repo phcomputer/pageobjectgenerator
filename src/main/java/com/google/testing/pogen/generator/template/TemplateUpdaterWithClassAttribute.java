@@ -47,7 +47,7 @@ class TemplateUpdaterWithClassAttribute extends TemplateUpdater {
   protected StringBuilder buildModifiedTag(String template, HtmlTagInfo tagInfo) {
     StringBuilder tag =
         new StringBuilder(template.substring(tagInfo.getStartIndex(), tagInfo.getEndIndex()));
-    tagInfo.setId(generateUniqueId());
+    tagInfo.setAttributeValue(generateUniqueValue());
     if (tagInfo.hasAttributeValue()) {
       int space = StringUtils.indexOf(tag, ' ');
       int equal;

@@ -75,14 +75,16 @@ public class HtmlTagInfo {
    * Adds a {@link VariableInfo} instance with the specified variable name and the specified start
    * index.
    * 
+   * @param printCommandText the command text to print the template variable
    * @param variableName the name of the template variable to be added
    * @param variableStartIndex the start position of the template variable in the parsed template
    */
-  public void addVariableInfo(String variableName, int variableStartIndex) {
+  public void addVariableInfo(String printCommandText, String variableName, int variableStartIndex) {
     Preconditions.checkArgument(!Strings.isNullOrEmpty(variableName));
     Preconditions.checkArgument(variableStartIndex >= 0);
 
-    VariableInfo varInfo = getOrCreateVariableInfo(variableName, variableStartIndex);
+    VariableInfo varInfo =
+        getOrCreateVariableInfo(printCommandText, variableName, variableStartIndex);
     varInfo.setContainedByText(true);
   }
 
@@ -90,30 +92,35 @@ public class HtmlTagInfo {
    * Adds a {@link VariableInfo} instance with the specified variable name, the specified attribute
    * name and the specified start index.
    * 
+   * @param printCommandText the command text to print the template variable
    * @param variableName the name of the template variable to be added
    * @param variableStartIndex the start position of the template variable in the parsed template
    * @param attributeName the name of the attribute which contains the template variable
    */
-  public void addVariableInfo(String variableName, int variableStartIndex, String attributeName) {
+  public void addVariableInfo(String printCommandText, String variableName, int variableStartIndex,
+      String attributeName) {
     Preconditions.checkArgument(!Strings.isNullOrEmpty(variableName));
     Preconditions.checkArgument(variableStartIndex >= 0);
     Preconditions.checkNotNull(attributeName);
 
-    VariableInfo varInfo = getOrCreateVariableInfo(variableName, variableStartIndex);
+    VariableInfo varInfo =
+        getOrCreateVariableInfo(printCommandText, variableName, variableStartIndex);
     varInfo.addAttributeName(attributeName);
   }
 
   /**
    * Returns the existing {@link VariableInfo} instance or a generated one if it doesn't exist.
    * 
+   * @param printCommandText the command text to print the template variable
    * @param variableName the name of the template variable to be added
    * @param variableStartIndex the start position of the template variable in the parsed template
    * @return the existing {@link VariableInfo} instance or a generated one if it doesn't exist
    */
-  private VariableInfo getOrCreateVariableInfo(String variableName, int variableStartIndex) {
+  private VariableInfo getOrCreateVariableInfo(String printCommandText, String variableName,
+      int variableStartIndex) {
     VariableInfo varInfo = variables.get(variableName);
     if (varInfo == null) {
-      varInfo = new VariableInfo(variableName, variableStartIndex);
+      varInfo = new VariableInfo(printCommandText, variableName, variableStartIndex);
       variables.put(variableName, varInfo);
     }
     return varInfo;
@@ -165,7 +172,7 @@ public class HtmlTagInfo {
     return variables.values();
   }
 
-  public void setId(String idValue) {
+  public void setAttributeValue(String idValue) {
     this.attributeValue = idValue;
   }
 }
