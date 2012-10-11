@@ -22,6 +22,7 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.xerces.xni.Augmentations;
 import org.apache.xerces.xni.NamespaceContext;
 import org.apache.xerces.xni.QName;
@@ -142,7 +143,6 @@ public abstract class RegexVariableExtractor extends SAXParser {
         new HtmlTagInfo(attrs.getValue(attributeName), info.getBeginCharacterOffset(),
             info.getEndCharacterOffset());
     tagInfoStack.push(tagInfo);
-    String idValue = null, nameValue = null;
 
     for (int i = 0; i < attrs.getLength(); i++) {
       // Ignore variables appearing two more than
@@ -164,10 +164,12 @@ public abstract class RegexVariableExtractor extends SAXParser {
 
   @Override
   public void endElement(QName element, Augmentations augs) throws XNIException {
+    String text = processCharacters();
+
     HtmlTagInfo tagInfo = tagInfoStack.pop();
     if (!excludedRanges.contains(tagInfo.getStartIndex())) {
       for (String tag : manipulableTags) {
-        if (element.rawname.equals(tag)) {
+        if (StringUtils.equalsIgnoreCase(element.rawname, tag)) {
           String name = element.rawname;
           if (!Strings.isNullOrEmpty(tagInfo.getIdValue())) {
             name += "_" + tagInfo.getIdValue();
@@ -175,8 +177,8 @@ public abstract class RegexVariableExtractor extends SAXParser {
           if (!Strings.isNullOrEmpty(tagInfo.getNameValue())) {
             name += "_" + tagInfo.getNameValue();
           }
-          if (!Strings.isNullOrEmpty(lastText)) {
-            name += "_" + lastText;
+          if (!Strings.isNullOrEmpty(text)) {
+            name += "_" + text;
           }
           tagInfo.addManipulableTag(name, tagInfo.getStartIndex());
           break;
@@ -184,7 +186,6 @@ public abstract class RegexVariableExtractor extends SAXParser {
       }
     }
 
-    processCharacters();
     if (!tagInfo.hasVariables()) {
       sortedHtmlTagInfos.add(tagInfo);
     }
@@ -192,7 +193,8 @@ public abstract class RegexVariableExtractor extends SAXParser {
     super.endElement(element, augs);
   }
 
-  private void processCharacters() {
+  private String processCharacters() {
+    String text = lastText;
     Matcher matcher = variablePattern.matcher(lastText);
     while (matcher.find()) {
       if (excludedRanges.contains(matcher.start(1))) {
@@ -205,6 +207,7 @@ public abstract class RegexVariableExtractor extends SAXParser {
       tagInfo.addVariableInfo(matcher.group(0), matcher.group(1), matcher.start(1));
     }
     lastText = "";
+    return text;
   }
 
   @Override

@@ -125,7 +125,7 @@ public class HtmlTagInfo {
     Preconditions.checkArgument(!Strings.isNullOrEmpty(variableName));
     Preconditions.checkArgument(variableStartIndex >= 0);
 
-    // getOrCreateVariableInfo(null, variableName, variableStartIndex, false, true);
+    getOrCreateVariableInfo(null, variableName, variableStartIndex, false, true);
   }
 
   /**
