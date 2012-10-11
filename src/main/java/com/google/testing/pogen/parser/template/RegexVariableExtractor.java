@@ -34,6 +34,9 @@ import org.cyberneko.html.parsers.SAXParser;
 import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
 
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
+
 /**
  * A class to extract template variables with its parent html tags by parsing a template with
  * CyberNeko HTML Parser.
@@ -72,6 +75,14 @@ public abstract class RegexVariableExtractor extends SAXParser {
    * A name of the attribute to be assigned for tags containing template variables.
    */
   private String attributeName;
+  /**
+   * A immutable list of names of manipulatable tags.
+   */
+  private static final ImmutableList<String> manipulableTags;
+
+  static {
+    manipulableTags = ImmutableList.of("a", "link", "input", "button", "textarea");
+  }
 
   /**
    * Constructs an instance to extract template variables with the specified positions of excluded
@@ -131,6 +142,7 @@ public abstract class RegexVariableExtractor extends SAXParser {
         new HtmlTagInfo(attrs.getValue(attributeName), info.getBeginCharacterOffset(),
             info.getEndCharacterOffset());
     tagInfoStack.push(tagInfo);
+    String idValue = null, nameValue = null;
 
     for (int i = 0; i < attrs.getLength(); i++) {
       // Ignore variables appearing two more than
@@ -141,16 +153,38 @@ public abstract class RegexVariableExtractor extends SAXParser {
               attrs.getQName(i));
         }
       }
+      if (attrs.getQName(i).equals("id")) {
+        tagInfo.setIdValue(attrs.getValue(i));
+      } else if (attrs.getQName(i).equals("name")) {
+        tagInfo.setNameValue(attrs.getValue(i));
+      }
     }
-
     super.startElement(element, attrs, augs);
   }
 
   @Override
   public void endElement(QName element, Augmentations augs) throws XNIException {
-    processCharacters();
-
     HtmlTagInfo tagInfo = tagInfoStack.pop();
+    if (!excludedRanges.contains(tagInfo.getStartIndex())) {
+      for (String tag : manipulableTags) {
+        if (element.rawname.equals(tag)) {
+          String name = element.rawname;
+          if (!Strings.isNullOrEmpty(tagInfo.getIdValue())) {
+            name += "_" + tagInfo.getIdValue();
+          }
+          if (!Strings.isNullOrEmpty(tagInfo.getNameValue())) {
+            name += "_" + tagInfo.getNameValue();
+          }
+          if (!Strings.isNullOrEmpty(lastText)) {
+            name += "_" + lastText;
+          }
+          tagInfo.addManipulableTag(name, tagInfo.getStartIndex());
+          break;
+        }
+      }
+    }
+
+    processCharacters();
     if (!tagInfo.hasVariables()) {
       sortedHtmlTagInfos.add(tagInfo);
     }

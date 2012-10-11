@@ -185,7 +185,9 @@ public abstract class TestCodeGenerator {
         String newVarName = varInfo.getName() + convertToString(varIndex);
 
         appendElementGetter(builder, methodBuilder, newVarName, attrValue, isRepeated);
-        appendTextGetter(methodBuilder, newVarName, tagInfo, varInfo, isRepeated);
+        if (!varInfo.isManipulableTag()) {
+          appendTextGetter(methodBuilder, newVarName, tagInfo, varInfo, isRepeated);
+        }
         for (String attrName : varInfo.getSortedAttributeNames()) {
           appendAttributeGetter(methodBuilder, newVarName, attrName, attrValue, isRepeated);
         }
