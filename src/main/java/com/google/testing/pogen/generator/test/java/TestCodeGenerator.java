@@ -116,8 +116,6 @@ public abstract class TestCodeGenerator {
     appendLine(builder);
 
     appendLine(builder, 1, GENERATED_CODE_START_MARK);
-    appendLine(builder, 1,
-        "private static Pattern commentPattern = Pattern.compile(\"<!--POGEN,([^,]*),([^,]*),(.*?)-->\");");
     appendFieldsAndGetters(builder, templateInfo);
     appendLine(builder, 1, GENERATED_CODE_END_MARK);
     appendLine(builder, 0, "}");
@@ -164,8 +162,12 @@ public abstract class TestCodeGenerator {
     // as "private int field1; private int field2;
     // private void method1() {} private void method2() {}".
     StringBuilder methodBuilder = new StringBuilder();
-
     HashMultiset<String> varNameCounter = HashMultiset.create();
+
+    appendLine(
+        builder,
+        1,
+        "private static Pattern commentPattern = Pattern.compile(\"<!--POGEN,([^,]*),([^,]*),(.*?)-->\", Pattern.DOTALL);");
 
     for (HtmlTagInfo tagInfo : templateInfo.getHtmlTagInfos()) {
       // Skip this variable if it has no parent html tag
@@ -211,9 +213,9 @@ public abstract class TestCodeGenerator {
       String variableName, String assignedAttributeValue, boolean isRepeated) {
     if (!isRepeated) {
       appendField(fieldBuilder, variableName, assignedAttributeValue);
-      appendGetter(methodBuilder, variableName, "", "WebElement", "ElementFor");
+      appendGetter(methodBuilder, variableName, "", "WebElement", "ElementOf");
     } else {
-      appendListGetter(methodBuilder, variableName, "", "WebElement", "ElementsFor",
+      appendListGetter(methodBuilder, variableName, "", "WebElement", "ElementsOf",
           assignedAttributeValue);
     }
   }
@@ -232,7 +234,7 @@ public abstract class TestCodeGenerator {
       HtmlTagInfo tagInfo, VariableInfo varInfo, boolean isRepeated) {
     // TODO(kazuu): Help to select proper one from getFoo, getFoo2, getFoo3 ...
     appendLine(methodBuilder);
-    String methodNamePrefix = !isRepeated ? "String getTextFor" : "List<String> getTextsFor";
+    String methodNamePrefix = !isRepeated ? "String getTextOf" : "List<String> getTextsOf";
     String foundedProcess =
         !isRepeated ? "return matcher.group(3);" : "result.add(matcher.group(3));";
     String finalProcess = !isRepeated ? "return null;" : "return result;";
@@ -271,10 +273,11 @@ public abstract class TestCodeGenerator {
       String attributeName, String assignedAttributeValue, boolean isRepeated) {
     if (!isRepeated) {
       appendGetter(methodBuilder, variableName, ".getAttribute(\"" + attributeName + "\")",
-          "String", StringUtils.capitalize(attributeName) + "AttributeFor");
+          "String", "AttributeOf" + StringUtils.capitalize(attributeName) + "On");
     } else {
       appendListGetter(methodBuilder, variableName, ".getAttribute(\"" + attributeName + "\")",
-          "String", StringUtils.capitalize(attributeName) + "AttributesFor", assignedAttributeValue);
+          "String", "AttributesOf" + StringUtils.capitalize(attributeName) + "On",
+          assignedAttributeValue);
     }
   }
 

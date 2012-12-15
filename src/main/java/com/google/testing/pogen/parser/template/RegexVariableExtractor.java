@@ -82,7 +82,7 @@ public abstract class RegexVariableExtractor extends SAXParser {
   private static final ImmutableList<String> manipulableTags;
 
   static {
-    manipulableTags = ImmutableList.of("a", "link", "input", "button", "textarea");
+    manipulableTags = ImmutableList.of("a", "link", "input", "button", "textarea", "select");
   }
 
   /**
@@ -170,16 +170,7 @@ public abstract class RegexVariableExtractor extends SAXParser {
     if (!excludedRanges.contains(tagInfo.getStartIndex())) {
       for (String tag : manipulableTags) {
         if (StringUtils.equalsIgnoreCase(element.rawname, tag)) {
-          String name = element.rawname;
-          if (!Strings.isNullOrEmpty(tagInfo.getIdValue())) {
-            name += "_" + tagInfo.getIdValue();
-          }
-          if (!Strings.isNullOrEmpty(tagInfo.getNameValue())) {
-            name += "_" + tagInfo.getNameValue();
-          }
-          if (!Strings.isNullOrEmpty(text)) {
-            name += "_" + text;
-          }
+          String name = decideName(element, text, tagInfo);
           tagInfo.addManipulableTag(name, tagInfo.getStartIndex());
           break;
         }
@@ -191,6 +182,28 @@ public abstract class RegexVariableExtractor extends SAXParser {
     }
 
     super.endElement(element, augs);
+  }
+
+  /**
+   * @param element
+   * @param text
+   * @param tagInfo
+   * @return
+   */
+  private String decideName(QName element, String text, HtmlTagInfo tagInfo) {
+    // TODO: Write method explanation
+    // TODO: Reconsider about <a href='{$url}'></a>
+    String name = element.rawname;
+    if (!Strings.isNullOrEmpty(tagInfo.getNameValue())) {
+      name += "_" + tagInfo.getNameValue();
+    }
+    if (!Strings.isNullOrEmpty(tagInfo.getIdValue())) {
+      name += "_" + tagInfo.getIdValue();
+    }
+    if (name == element.rawname && !Strings.isNullOrEmpty(text)) {
+      name += "_" + text;
+    }
+    return name;
   }
 
   private String processCharacters() {

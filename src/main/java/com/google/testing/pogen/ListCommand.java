@@ -72,8 +72,11 @@ public class ListCommand extends Command {
             String id = tagInfo.hasAttributeValue() ? tagInfo.getAttributeValue() : "";
             System.out.print(templatePath + ", " + id);
             for (VariableInfo variableInfo : tagInfo.getVariableInfos()) {
-              System.out.print(", " + variableInfo.getName());
+              if (!variableInfo.isManipulableTag()) {
+                System.out.print(", " + variableInfo.getName());
+              }
             }
+            System.out.println();
           }
         }
       } catch (TemplateParseException e) {
