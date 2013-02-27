@@ -7,6 +7,7 @@ import java.io.File;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
 import com.google.testing.pogen.pages.IndexPage;
@@ -28,7 +29,9 @@ public class TestCase {
   public void test() {
     File file = new File("src/main/resources/index.html");
     driver.get("file:///" + file.getAbsolutePath().replace('\\', '/'));
+    By name = By.name("");
     IndexPage page = new IndexPage(driver);
+    driver.findElement(By.tagName("title"));
     assertEquals("{$title|escapeUri}", page.getTextForTitle());
     assertEquals("{$value}", page.getTextForValue());
     assertEquals("{$value2}", page.getTextForValue2());

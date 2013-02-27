@@ -125,20 +125,24 @@ public abstract class RegexVariableExtractor extends SAXParser {
   public void startElement(QName element, XMLAttributes attrs, Augmentations augs) {
     processCharacters();
 
-    // Get offset information
-    HTMLEventInfo info = (HTMLEventInfo) augs.getItem(AUGMENTATIONS);
-    HtmlTagInfo tagInfo =
-        new HtmlTagInfo(attrs.getValue(attributeName), info.getBeginCharacterOffset(),
-            info.getEndCharacterOffset());
-    tagInfoStack.push(tagInfo);
+    // Ignore elements with prefix (:) to deal with not html elements such as "c:set" in JSP.
+    if (element.prefix == null) {
+      // Get offset information
+      HTMLEventInfo info = (HTMLEventInfo) augs.getItem(AUGMENTATIONS);
+      HtmlTagInfo tagInfo =
+          new HtmlTagInfo(attrs.getValue(attributeName), info.getBeginCharacterOffset(),
+              info.getEndCharacterOffset());
+      tagInfoStack.push(tagInfo);
 
-    for (int i = 0; i < attrs.getLength(); i++) {
-      // Ignore variables appearing two more than
-      Matcher matcher = variablePattern.matcher(attrs.getValue(i));
-      while (matcher.find()) {
-        if (!excludedRanges.contains(matcher.start(1))) {
-          tagInfo.addVariableInfo(matcher.group(0), matcher.group(1), matcher.start(1),
-              attrs.getQName(i));
+      for (int i = 0; i < attrs.getLength(); i++) {
+        // Ignore variables appearing two more than
+        Matcher matcher = variablePattern.matcher(attrs.getValue(i));
+        while (matcher.find()) {
+          int iGroup = getFirstAvailableGroupIndex(matcher);
+          if (!excludedRanges.contains(matcher.start(iGroup))) {
+            tagInfo.addVariableInfo(matcher.group(0), matcher.group(iGroup), matcher.start(iGroup),
+                attrs.getQName(i));
+          }
         }
       }
     }
@@ -146,13 +150,24 @@ public abstract class RegexVariableExtractor extends SAXParser {
     super.startElement(element, attrs, augs);
   }
 
+  private int getFirstAvailableGroupIndex(Matcher matcher) {
+    int iGroup = 0;
+    do {
+      iGroup++;
+    } while (matcher.group(iGroup) == null);
+    return iGroup;
+  }
+
   @Override
   public void endElement(QName element, Augmentations augs) throws XNIException {
     processCharacters();
 
-    HtmlTagInfo tagInfo = tagInfoStack.pop();
-    if (!tagInfo.hasVariables()) {
-      sortedHtmlTagInfos.add(tagInfo);
+    // Ignore elements with prefix (:) to deal with not html elements such as "c:set" in JSP.
+    if (element.prefix == null) {
+      HtmlTagInfo tagInfo = tagInfoStack.pop();
+      if (!tagInfo.hasVariables()) {
+        sortedHtmlTagInfos.add(tagInfo);
+      }
     }
 
     super.endElement(element, augs);
@@ -168,7 +183,8 @@ public abstract class RegexVariableExtractor extends SAXParser {
       // because NekoHTML add <html> tag as a root element automatically
       // Note that tags automatically added have -1 start/end indices
       HtmlTagInfo tagInfo = tagInfoStack.peek();
-      tagInfo.addVariableInfo(matcher.group(0), matcher.group(1), matcher.start(1));
+      int iGroup = getFirstAvailableGroupIndex(matcher);
+      tagInfo.addVariableInfo(matcher.group(0), matcher.group(iGroup), matcher.start(iGroup));
     }
     lastText = "";
   }

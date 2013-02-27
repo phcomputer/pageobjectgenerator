@@ -38,7 +38,8 @@ public class JspParser extends TemplateParser {
   /**
    * A regular expression which indicates the start tag of for.
    */
-  private static final Pattern FOR_START_PATTERN = Pattern.compile("<%\\s*for");
+  // TODO: should be more smart
+  private static final Pattern FOR_START_PATTERN = Pattern.compile("<%\\s*(for|while|if)");
   /**
    * A regular expression which indicates the end tag of for.
    */

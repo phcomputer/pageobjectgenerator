@@ -93,7 +93,7 @@ public class PageObjectGenerator {
               .isRequired()
               .create('o'))
           .addOption(OptionBuilder
-              .withDescription("Root input directory of html template files.")
+              .withDescription("Root input directory of html template files for generating a package structure of test code.")
               .hasArg()
               .isRequired()
               .create('i'))
