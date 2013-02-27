@@ -166,7 +166,7 @@ public abstract class RegexVariableExtractor extends SAXParser {
       }
       // tagInfoStack always has some elements
       // because NekoHTML add <html> tag as a root element automatically
-      // Note that tags automatically added have -1 start/end indexes
+      // Note that tags automatically added have -1 start/end indices
       HtmlTagInfo tagInfo = tagInfoStack.peek();
       tagInfo.addVariableInfo(matcher.group(0), matcher.group(1), matcher.start(1));
     }

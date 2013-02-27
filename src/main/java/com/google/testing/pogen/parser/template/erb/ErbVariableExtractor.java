@@ -22,7 +22,7 @@ import com.google.testing.pogen.parser.template.RegexVariableExtractor;
 import com.google.testing.pogen.parser.template.TemplateParseException;
 
 /**
- * A class to extract template variables for erb template engine.
+ * A class to extract template variables for the erb template engine.
  * 
  * @author Kazunori Sakamoto
  */

@@ -22,7 +22,7 @@ import com.google.testing.pogen.parser.template.RegexVariableExtractor;
 import com.google.testing.pogen.parser.template.TemplateParseException;
 
 /**
- * A class to extract template variables for JSF template engine.
+ * A class to extract template variables for the JSF template engine.
  * 
  * @author Kazunori Sakamoto
  */
