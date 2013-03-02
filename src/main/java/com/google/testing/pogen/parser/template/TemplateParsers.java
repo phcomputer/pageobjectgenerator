@@ -2,7 +2,9 @@ package com.google.testing.pogen.parser.template;
 
 import com.google.testing.pogen.parser.template.ejs.EjsParser;
 import com.google.testing.pogen.parser.template.erb.ErbParser;
+import com.google.testing.pogen.parser.template.gtmpl.GroovyTemplateParser;
 import com.google.testing.pogen.parser.template.jsf.JsfParser;
+import com.google.testing.pogen.parser.template.jsp.JspParser;
 import com.google.testing.pogen.parser.template.soy.SoyParser;
 
 /**
@@ -29,6 +31,10 @@ public class TemplateParsers {
       return new ErbParser(attributeName);
     } else if (templatePath.endsWith(".xhtml")) {
       return new JsfParser(attributeName);
+    } else if (templatePath.endsWith(".jsp")) {
+      return new JspParser(attributeName);
+    } else if (templatePath.endsWith(".gtmpl")) {
+      return new GroovyTemplateParser(attributeName);
     } else {
       return new SoyParser(attributeName);
     }

@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.testing.pogen.parser.template.ejs;
+package com.google.testing.pogen.parser.template.jsp;
 
 import java.util.regex.Pattern;
 
@@ -22,11 +22,11 @@ import com.google.testing.pogen.parser.template.RegexVariableExtractor;
 import com.google.testing.pogen.parser.template.TemplateParseException;
 
 /**
- * A class to extract template variables for the ejs template engine.
+ * A class to extract template variables for the JSP template engine.
  * 
  * @author Kazunori Sakamoto
  */
-public class EjsVariableExtractor extends RegexVariableExtractor {
+public class JspVariableExtractor extends RegexVariableExtractor {
 
   /**
    * Constructs an instance to extract template variables with the specified positions of excluded
@@ -37,13 +37,13 @@ public class EjsVariableExtractor extends RegexVariableExtractor {
    *        variables
    * @throws TemplateParseException if the specified template is in bad format
    */
-  public EjsVariableExtractor(RangeSet<Integer> excludedRanges, String attributeName)
+  public JspVariableExtractor(RangeSet<Integer> excludedRanges, String attributeName)
       throws TemplateParseException {
     super(excludedRanges, attributeName);
   }
 
   @Override
   protected Pattern initializeVariablePattern() {
-    return Pattern.compile("<%=\\s*(.*?)%>");
+    return Pattern.compile("<%=\\s*(.*?)%>|\\$\\{([^{]*)\\}");
   }
 }

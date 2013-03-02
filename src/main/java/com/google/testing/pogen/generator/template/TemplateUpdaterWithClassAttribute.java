@@ -49,16 +49,17 @@ class TemplateUpdaterWithClassAttribute extends TemplateUpdater {
         new StringBuilder(template.substring(tagInfo.getStartIndex(), tagInfo.getEndIndex()));
     tagInfo.setAttributeValue(generateUniqueValue());
     if (tagInfo.hasAttributeValue()) {
-      int space = StringUtils.indexOf(tag, ' ');
+      int space = StringUtils.indexOfAny(tag, ' ', '\t', '\r', '\n');
       int equal;
       while (space > 0 && (equal = StringUtils.indexOf(tag, '=', space + 1)) > 0) {
         String name = tag.substring(space + 1, equal).trim();
-        int leftQuote = StringUtils.indexOfAny(tag, '"', '\'');
+        int leftQuote = StringUtils.indexOfAny(
+            tag.substring(space + 1), '"', '\'') + space + 1;
         if (name.equals("class")) {
           tag.insert(leftQuote + 1, tagInfo.getAttributeValue() + " ");
           return tag;
         }
-        space = StringUtils.indexOf(tag, tag.charAt(leftQuote)) + 1;
+        space = StringUtils.indexOf(tag, tag.charAt(leftQuote), leftQuote + 1) + 1;
       }
     }
     // Deal with closed tag such as <br />
