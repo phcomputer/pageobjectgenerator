@@ -102,13 +102,12 @@ public abstract class TemplateUpdater {
       // Build a modified tag containing template variables
       StringBuilder tag = buildModifiedTag(template, tagInfo);
       for (VariableInfo varInfo : tagInfo.getVariableInfos()) {
-        newTemplate.append("<!--" + commentPrefix + "," + tagInfo.getAttributeValue() + ","
-            + varInfo.getName() + "," + varInfo.getPrintCommandText() + "-->");
+        if (!varInfo.isManipulableTag()) {
+          newTemplate.append("<!--" + commentPrefix + "," + tagInfo.getAttributeValue() + ","
+              + varInfo.getName() + "," + varInfo.getPrintCommandText() + "-->");
+        }
       }
       newTemplate.append(tag);
-
-      // <!--POGEN,-->
-      // tagInfo.getAttributeValue()
     }
     // Add the rest part of the template
     newTemplate.append(template.subSequence(lastIndex, template.length()));

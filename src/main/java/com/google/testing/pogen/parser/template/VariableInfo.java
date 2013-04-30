@@ -49,20 +49,29 @@ public class VariableInfo {
    */
   private boolean containedByText;
   /**
+   * A boolean whether this template variable is dummy for the manipulable tags such as a and input.
+   */
+  private boolean manipulableTag;
+  /**
    * Sorted names of attributes which contain this template variable. Note that an empty string of
    * an attribute name means this variable appears in a text element.
    */
   private final TreeSet<String> attributeNames;
 
   /**
-   * Constructs the information of a template variable with the specified name , the specified start
+   * Constructs the information of a template variable with the specified name, the specified start
    * position and the specified attribute name.
    * 
    * @param printCommandText the command text to print the template variable
    * @param name the name of this template variable
    * @param startIndex the start position of this template variable in the parsed template
+   * @param containedByText the boolean whether this template variable is contained by a text
+   *        element
+   * @param manipulableTag the boolean whether this template variable is dummy for
+   *        the manipulable tags such as a and input
    */
-  public VariableInfo(String printCommandText, String name, int startIndex) {
+  public VariableInfo(String printCommandText, String name, int startIndex,
+      boolean containedByText, boolean manipulableTag) {
     Preconditions.checkArgument(!Strings.isNullOrEmpty(name));
     Preconditions.checkArgument(startIndex >= 0);
 
@@ -71,6 +80,8 @@ public class VariableInfo {
     this.name = NameConverter.getJavaIdentifier(name);
     this.startIndex = startIndex;
     this.attributeNames = Sets.newTreeSet();
+    this.containedByText = containedByText;
+    this.manipulableTag = manipulableTag;
   }
 
   /**
@@ -104,7 +115,7 @@ public class VariableInfo {
     return containedByText;
   }
 
-  public void setContainedByText(boolean containedByText) {
-    this.containedByText = containedByText;
+  public boolean isManipulableTag() {
+    return manipulableTag;
   }
 }

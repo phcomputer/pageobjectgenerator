@@ -51,6 +51,14 @@ public class HtmlTagInfo {
    * A map of variable names and {@link VariableInfo} instances.
    */
   private final Map<String, VariableInfo> variables;
+  /**
+   * An id attribute value in this html tag.
+   */
+  private String idValue;
+  /**
+   * A name attribute value in this html tag.
+   */
+  private String nameValue;
 
   /**
    * Constructs an instance with the assigned attribute value, the specified start and the specified
@@ -72,8 +80,8 @@ public class HtmlTagInfo {
   }
 
   /**
-   * Adds a {@link VariableInfo} instance with the specified variable name and the specified start
-   * index.
+   * Adds a {@link VariableInfo} instance with the specified name for the manipulable tag and the
+   * specified start index.
    * 
    * @param printCommandText the command text to print the template variable
    * @param variableName the name of the template variable to be added
@@ -83,9 +91,7 @@ public class HtmlTagInfo {
     Preconditions.checkArgument(!Strings.isNullOrEmpty(variableName));
     Preconditions.checkArgument(variableStartIndex >= 0);
 
-    VariableInfo varInfo =
-        getOrCreateVariableInfo(printCommandText, variableName, variableStartIndex);
-    varInfo.setContainedByText(true);
+    getOrCreateVariableInfo(printCommandText, variableName, variableStartIndex, true, false);
   }
 
   /**
@@ -104,8 +110,22 @@ public class HtmlTagInfo {
     Preconditions.checkNotNull(attributeName);
 
     VariableInfo varInfo =
-        getOrCreateVariableInfo(printCommandText, variableName, variableStartIndex);
+        getOrCreateVariableInfo(printCommandText, variableName, variableStartIndex, false, false);
     varInfo.addAttributeName(attributeName);
+  }
+
+  /**
+   * Adds a {@link VariableInfo} instance with the specified variable name for speci and the
+   * specified start index.
+   * 
+   * @param variableName the name of the template variable to be added
+   * @param variableStartIndex the start position of the template variable in the parsed template
+   */
+  public void addManipulableTag(String variableName, int variableStartIndex) {
+    Preconditions.checkArgument(!Strings.isNullOrEmpty(variableName));
+    Preconditions.checkArgument(variableStartIndex >= 0);
+
+    getOrCreateVariableInfo(null, variableName, variableStartIndex, false, true);
   }
 
   /**
@@ -114,13 +134,19 @@ public class HtmlTagInfo {
    * @param printCommandText the command text to print the template variable
    * @param variableName the name of the template variable to be added
    * @param variableStartIndex the start position of the template variable in the parsed template
+   * @param containedByText the boolean whether this template variable is contained by a text
+   *        element
+   * @param manipulableTag the boolean whether this template variable is dummy for the manipulable
+   *        tags such as a and input
    * @return the existing {@link VariableInfo} instance or a generated one if it doesn't exist
    */
   private VariableInfo getOrCreateVariableInfo(String printCommandText, String variableName,
-      int variableStartIndex) {
+      int variableStartIndex, boolean containedByText, boolean manipulableTag) {
     VariableInfo varInfo = variables.get(variableName);
     if (varInfo == null) {
-      varInfo = new VariableInfo(printCommandText, variableName, variableStartIndex);
+      varInfo =
+          new VariableInfo(printCommandText, variableName, variableStartIndex, containedByText,
+              manipulableTag);
       variables.put(variableName, varInfo);
     }
     return varInfo;
@@ -172,7 +198,23 @@ public class HtmlTagInfo {
     return variables.values();
   }
 
-  public void setAttributeValue(String idValue) {
-    this.attributeValue = idValue;
+  public void setAttributeValue(String attributeValue) {
+    this.attributeValue = attributeValue;
+  }
+
+  public String getIdValue() {
+    return idValue;
+  }
+
+  public void setIdValue(String idValue) {
+    this.idValue = idValue;
+  }
+
+  public String getNameValue() {
+    return nameValue;
+  }
+
+  public void setNameValue(String nameValue) {
+    this.nameValue = nameValue;
   }
 }

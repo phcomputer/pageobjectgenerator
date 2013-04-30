@@ -22,6 +22,7 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.xerces.xni.Augmentations;
 import org.apache.xerces.xni.NamespaceContext;
 import org.apache.xerces.xni.QName;
@@ -33,6 +34,9 @@ import org.cyberneko.html.HTMLEventInfo;
 import org.cyberneko.html.parsers.SAXParser;
 import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
+
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 
 /**
  * A class to extract template variables with its parent html tags by parsing a template with
@@ -72,6 +76,14 @@ public abstract class RegexVariableExtractor extends SAXParser {
    * A name of the attribute to be assigned for tags containing template variables.
    */
   private String attributeName;
+  /**
+   * A immutable list of names of manipulatable tags.
+   */
+  private static final ImmutableList<String> manipulableTags;
+
+  static {
+    manipulableTags = ImmutableList.of("a", "link", "input", "button", "textarea", "select");
+  }
 
   /**
    * Constructs an instance to extract template variables with the specified positions of excluded
@@ -144,9 +156,13 @@ public abstract class RegexVariableExtractor extends SAXParser {
                 attrs.getQName(i));
           }
         }
+        if (attrs.getQName(i).equals("id")) {
+          tagInfo.setIdValue(attrs.getValue(i));
+        } else if (attrs.getQName(i).equals("name")) {
+          tagInfo.setNameValue(attrs.getValue(i));
+        }
       }
     }
-
     super.startElement(element, attrs, augs);
   }
 
@@ -160,12 +176,22 @@ public abstract class RegexVariableExtractor extends SAXParser {
 
   @Override
   public void endElement(QName element, Augmentations augs) throws XNIException {
-    processCharacters();
+    String text = processCharacters();
 
     // Ignore elements with prefix (:) to deal with not html elements such as "c:set" in JSP.
     // TODO(kazuu): Should we ignore elements with prefix (:)? Really?
     if (element.prefix == null) {
       HtmlTagInfo tagInfo = tagInfoStack.pop();
+      if (!excludedRanges.contains(tagInfo.getStartIndex())) {
+        for (String tag : manipulableTags) {
+          if (StringUtils.equalsIgnoreCase(element.rawname, tag)) {
+            String name = decideName(element, text, tagInfo);
+            tagInfo.addManipulableTag(name, tagInfo.getStartIndex());
+            break;
+          }
+        }
+      }
+
       if (!tagInfo.hasVariables()) {
         sortedHtmlTagInfos.add(tagInfo);
       }
@@ -174,7 +200,30 @@ public abstract class RegexVariableExtractor extends SAXParser {
     super.endElement(element, augs);
   }
 
-  private void processCharacters() {
+  /**
+   * @param element
+   * @param text
+   * @param tagInfo
+   * @return
+   */
+  private String decideName(QName element, String text, HtmlTagInfo tagInfo) {
+    // TODO: Write method explanation
+    // TODO: Reconsider about <a href='{$url}'></a>
+    String name = element.rawname;
+    if (!Strings.isNullOrEmpty(tagInfo.getNameValue())) {
+      name += "_" + tagInfo.getNameValue();
+    }
+    if (!Strings.isNullOrEmpty(tagInfo.getIdValue())) {
+      name += "_" + tagInfo.getIdValue();
+    }
+    if (name == element.rawname && !Strings.isNullOrEmpty(text)) {
+      name += "_" + text;
+    }
+    return name;
+  }
+
+  private String processCharacters() {
+    String text = lastText;
     Matcher matcher = variablePattern.matcher(lastText);
     while (matcher.find()) {
       if (excludedRanges.contains(matcher.start(1))) {
@@ -188,6 +237,7 @@ public abstract class RegexVariableExtractor extends SAXParser {
       tagInfo.addVariableInfo(matcher.group(0), matcher.group(iGroup), matcher.start(iGroup));
     }
     lastText = "";
+    return text;
   }
 
   @Override
