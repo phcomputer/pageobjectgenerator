@@ -37,6 +37,7 @@ import org.xml.sax.SAXNotSupportedException;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.RangeSet;
 
 /**
  * A class to extract template variables with its parent html tags by parsing a template with

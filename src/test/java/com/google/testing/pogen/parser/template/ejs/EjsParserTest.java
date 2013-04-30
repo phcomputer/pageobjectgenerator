@@ -15,7 +15,7 @@
 
 package com.google.testing.pogen.parser.template.ejs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,8 +25,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import com.google.common.collect.RangeSet;
 import com.google.testing.pogen.parser.template.ParserTestUtil;
-import com.google.testing.pogen.parser.template.RangeSet;
 import com.google.testing.pogen.parser.template.TemplateParseException;
 import com.google.testing.pogen.parser.template.soy.SoyParser;
 

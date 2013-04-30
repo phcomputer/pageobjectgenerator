@@ -15,10 +15,11 @@
 
 package com.google.testing.pogen.parser.template;
 
-import com.google.common.base.Preconditions;
-
 import java.util.Collections;
 import java.util.List;
+
+import com.google.common.base.Preconditions;
+import com.google.common.collect.RangeSet;
 
 /**
  * A class to contain the information of a template such as template content and

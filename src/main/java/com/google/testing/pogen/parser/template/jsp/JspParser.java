@@ -24,8 +24,9 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.RangeSet;
+import com.google.common.collect.TreeRangeSet;
 import com.google.testing.pogen.parser.template.HtmlTagInfo;
-import com.google.testing.pogen.parser.template.RangeSet;
 import com.google.testing.pogen.parser.template.TemplateParseException;
 import com.google.testing.pogen.parser.template.TemplateParser;
 
@@ -60,7 +61,7 @@ public class JspParser extends TemplateParser {
       throws TemplateParseException {
     Preconditions.checkNotNull(template);
     JspVariableExtractor extractor =
-        new JspVariableExtractor(new RangeSet<Integer>(), attributeName);
+        new JspVariableExtractor(TreeRangeSet.<Integer>create(), attributeName);
     try {
       extractor.parse(new InputSource(new StringReader(template)));
     } catch (SAXException e) {

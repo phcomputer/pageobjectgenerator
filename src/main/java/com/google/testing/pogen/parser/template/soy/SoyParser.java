@@ -26,9 +26,9 @@ import org.xml.sax.SAXException;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Range;
+import com.google.common.collect.RangeSet;
 import com.google.testing.pogen.parser.template.HtmlTagInfo;
-import com.google.testing.pogen.parser.template.Pair;
-import com.google.testing.pogen.parser.template.RangeSet;
+import com.google.testing.pogen.parser.template.StringWithIndex;
 import com.google.testing.pogen.parser.template.TemplateParseException;
 import com.google.testing.pogen.parser.template.TemplateParser;
 
@@ -109,17 +109,17 @@ public class SoyParser extends TemplateParser {
     RangeSet<Integer> forRanges = parseForTags(template);
 
     Map<String, Range<Integer>> templateRanges = parseTemplateTags(template);
-    List<Pair<String, Integer>> calls = getMatchedStringAndIndexes(template, CALL_PATTERN, 1);
+    List<StringWithIndex> calls = getMatchedStringAndIndexes(template, CALL_PATTERN, 1);
 
     boolean added;
     do {
       added = false;
       for (int i = calls.size() - 1; i >= 0; i--) {
-        Pair<String, Integer> nameAndIndex = calls.get(i);
-        if (forRanges.contains(nameAndIndex.second)) {
+        StringWithIndex nameAndIndex = calls.get(i);
+        if (forRanges.contains(nameAndIndex.getIndex())) {
           // If a template definition is called from another repeated part, it's
           // treated as repeated part
-          forRanges.add(templateRanges.get(nameAndIndex.first));
+          forRanges.add(templateRanges.get(nameAndIndex.getString()));
           calls.remove(i);
           added = true;
         }

@@ -17,7 +17,7 @@ package com.google.testing.pogen.parser.template.ejs;
 
 import java.util.regex.Pattern;
 
-import com.google.testing.pogen.parser.template.RangeSet;
+import com.google.common.collect.RangeSet;
 import com.google.testing.pogen.parser.template.RegexVariableExtractor;
 import com.google.testing.pogen.parser.template.TemplateParseException;
 

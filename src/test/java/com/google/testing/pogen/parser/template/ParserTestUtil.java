@@ -21,6 +21,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.RangeSet;
 
 /**
  * A utility class for parser tests.
