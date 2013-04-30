@@ -163,6 +163,7 @@ public abstract class RegexVariableExtractor extends SAXParser {
     processCharacters();
 
     // Ignore elements with prefix (:) to deal with not html elements such as "c:set" in JSP.
+    // TODO(kazuu): Should we ignore elements with prefix (:)? Really?
     if (element.prefix == null) {
       HtmlTagInfo tagInfo = tagInfoStack.pop();
       if (!tagInfo.hasVariables()) {
