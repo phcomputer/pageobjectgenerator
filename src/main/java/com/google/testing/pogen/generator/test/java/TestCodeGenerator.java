@@ -1,4 +1,4 @@
-// Copyright 2011 The PageObjectGenerator Authors.
+// Copyright 2011-2013 The PageObjectGenerator Authors.
 // Copyright 2011 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -177,7 +177,7 @@ public abstract class TestCodeGenerator {
       }
 
       String attrValue = tagInfo.getAttributeValue();
-      boolean isRepeated = templateInfo.isRepeated(tagInfo);
+      boolean isRepeated = tagInfo.isRepeated();
 
       for (VariableInfo varInfo : tagInfo.getVariableInfos()) {
         // When the same template variable appears in other html tags,

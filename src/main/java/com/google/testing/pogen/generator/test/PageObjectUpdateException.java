@@ -31,6 +31,13 @@ public class PageObjectUpdateException extends Exception {
   public PageObjectUpdateException() {}
 
   /**
+   * Construct a test-code-updating exception with a detail message.
+   */
+  public PageObjectUpdateException(String message) {
+    super(message);
+  }
+
+  /**
    * Construct a test-code-updating exception chaining the supplied {@link Exception}.
    * 
    * @param exception the supplied {@link Exception}

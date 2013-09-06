@@ -45,7 +45,7 @@ import com.google.common.collect.RangeSet;
  * 
  * @author Kazunori Sakamoto
  */
-public abstract class RegexVariableExtractor extends SAXParser {
+public class RegexVariableExtractor extends SAXParser {
   /**
    * A string to enable AUGMENTATIONS feature.
    */
@@ -65,6 +65,11 @@ public abstract class RegexVariableExtractor extends SAXParser {
    * contains template variables.
    */
   private final List<HtmlTagInfo> sortedHtmlTagInfos;
+  /**
+   * A set of positions of repeated parts such as "{template .t1}repeated part{/template}{foreach
+   * ...}repeated part{/foreach}".
+   */
+  private final RangeSet<Integer> repeatedRanges;
   /**
    * Positions of excluded parts such as "{call .t1}excluded part{/call}".
    */
@@ -90,18 +95,21 @@ public abstract class RegexVariableExtractor extends SAXParser {
    * Constructs an instance to extract template variables with the specified positions of excluded
    * parts and the given attribute name for memorizing the value.
    * 
-   * @param excludedRanges the {@link RangeSet} with the positions of excluded parts
+   * @param repeatedParts the {@link RangeSet} of the positions of repeated parts
+   * @param excludedRanges the {@link RangeSet} of the positions of excluded parts
    * @param attributeName the name of the attribute to be assigned for tags containing template
    *        variables
+   * @param variablePattern a regular expression for extracting template variables
    * @throws TemplateParseException if the specified template is in bad format
    */
-  public RegexVariableExtractor(RangeSet<Integer> excludedRanges, String attributeName)
-      throws TemplateParseException {
+  public RegexVariableExtractor(RangeSet<Integer> repeatedRanges, RangeSet<Integer> excludedRanges,
+      String attributeName, Pattern variablePattern) throws TemplateParseException {
+    this.repeatedRanges = repeatedRanges;
     this.excludedRanges = excludedRanges;
     this.attributeName = attributeName;
     this.tagInfoStack = new Stack<HtmlTagInfo>();
     this.sortedHtmlTagInfos = new ArrayList<HtmlTagInfo>();
-    this.variablePattern = initializeVariablePattern();
+    this.variablePattern = variablePattern;
 
     // CyberNeko HTML Parser supports AUGMENTATIONS
     try {
@@ -112,13 +120,6 @@ public abstract class RegexVariableExtractor extends SAXParser {
       throw new TemplateParseException(e);
     }
   }
-
-  /**
-   * Returns a regular expression for template variables.
-   * 
-   * @return a regular expression for template variables
-   */
-  protected abstract Pattern initializeVariablePattern();
 
   public List<HtmlTagInfo> getSortedHtmlTagInfos() {
     return Collections.unmodifiableList(sortedHtmlTagInfos);
@@ -144,7 +145,7 @@ public abstract class RegexVariableExtractor extends SAXParser {
       HTMLEventInfo info = (HTMLEventInfo) augs.getItem(AUGMENTATIONS);
       HtmlTagInfo tagInfo =
           new HtmlTagInfo(attrs.getValue(attributeName), info.getBeginCharacterOffset(),
-              info.getEndCharacterOffset());
+              info.getEndCharacterOffset(), repeatedRanges);
       tagInfoStack.push(tagInfo);
 
       for (int i = 0; i < attrs.getLength(); i++) {

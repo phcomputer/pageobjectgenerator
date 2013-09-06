@@ -64,9 +64,9 @@ public abstract class TemplateParser {
 	public TemplateInfo parse(String template) throws TemplateParseException {
 		Preconditions.checkNotNull(template);
 
-		List<HtmlTagInfo> htmlTagInfos = parseTagsContainingVariables(template);
-		RangeSet<Integer> repeatedParts = parseRepeatedPart(template);
-		return new TemplateInfo(template, htmlTagInfos, repeatedParts);
+        RangeSet<Integer> repeatedParts = parseRepeatedPart(template);
+		List<HtmlTagInfo> htmlTagInfos = parseTagsContainingVariables(template, repeatedParts);
+		return new TemplateInfo(template, htmlTagInfos);
 	}
 
 	/**
@@ -75,13 +75,14 @@ public abstract class TemplateParser {
 	 * 
 	 * @param template
 	 *            the string of the template to be parsed
+	 * @param repeatedParts 
 	 * @return the information list of html tags which contain template
 	 *         variables
 	 * @throws TemplateParseException
 	 *             if the specified template is in bad format
 	 */
 	protected abstract List<HtmlTagInfo> parseTagsContainingVariables(
-			String template) throws TemplateParseException;
+			String template, RangeSet<Integer> repeatedParts) throws TemplateParseException;
 
 	/**
 	 * Retrieves a {@link RangeSet} of indexes where the repeated part are
