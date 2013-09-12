@@ -1,12 +1,13 @@
 package com.google.testing.pogen.generator.test.java
 
 import com.google.common.base.Preconditions
-import com.google.common.collect.HashMultiset
+import com.google.common.collect.Sets
 import com.google.testing.pogen.generator.test.PageObjectUpdateException
 import com.google.testing.pogen.parser.template.TemplateInfo
+import com.google.testing.pogen.parser.template.VariableInfo
 import org.apache.commons.lang3.StringUtils
 
-abstract class TestCodeGenerator {
+class TestCodeGenerator {
 
 	/**
 	 * The string to indicate the start of generated fields and getter methods.
@@ -29,34 +30,39 @@ abstract class TestCodeGenerator {
 	val String newLine;
 
 	/**
-	 * The boolean value whether this instance uses css selectors.
+	 * The head string of the annotation @FindBy.
 	 */
-	val String findByAnnotationLeft;
-	val String findByAnnotationRight;
+	val String findByAnnotationHead;
 
-	static def createUsingCssSelector() {
-		
-	}
+	/**
+	 * The tail string of the annotation @FindBy.
+	 */
+	val String findByAnnotationTail;
 
 	/**
 	 * Constructs an instance with the default indent and new-line strings.
 	 * 
-	 * @param usedCssSelector boolean value whether this instance uses css selectors
+	 * @param assignedAttributeName the attribute name which is assigned to identify elements
 	 */
-	private new(String findByAnnotationLeft, String findByAnnotationRight) {
-		this(findByAnnotationLeft, findByAnnotationRight, "  ", "\n")
+	new(String assignedAttributeName) {
+		this(assignedAttributeName, "  ", "\n")
 	}
 
 	/**
 	 * Constructs an instance with the specified indent and the specified new-line strings.
 	 * 
-	 * @param usedCssSelector boolean value whether this instance uses css selectors
+	 * @param assignedAttributeName the attribute name which is assigned to identify elements
 	 * @param indent the string of indent for generating source code
 	 * @param newLine the string of new line for generating source code
 	 */
-	private new(String findByAnnotationLeft, String findByAnnotationRight, String indent, String newLine) {
-		this.findByAnnotationLeft = findByAnnotationLeft;
-		this.findByAnnotationRight = findByAnnotationRight;
+	new(String assignedAttributeName, String indent, String newLine) {
+		if (assignedAttributeName.equals("class")) {
+			this.findByAnnotationHead = "@FindBy(how = How.CSS, using = \"."
+			this.findByAnnotationTail = "\")"
+		} else {
+			this.findByAnnotationHead = "@FindBy(how = How.XPATH, using = \"//*[@" + assignedAttributeName + "='"
+			this.findByAnnotationTail = "']\")"
+		}
 		this.indent = indent;
 		this.newLine = newLine;
 	}
@@ -75,7 +81,7 @@ abstract class TestCodeGenerator {
 		Preconditions.checkNotNull(templateInfo);
 		Preconditions.checkNotNull(packageName);
 		Preconditions.checkNotNull(className);
-		return '''
+		val ret = '''
 			package «packageName»;
 			
 			import static org.junit.Assert.*;
@@ -99,14 +105,15 @@ abstract class TestCodeGenerator {
 					assertInvariant();
 				}
 				
-				private def assertInvariant() {
+				private void assertInvariant() {
 				}
-			
+				
 				«GENERATED_CODE_START_MARK»
 				«getFieldsAndGetters(templateInfo)»
 				«GENERATED_CODE_END_MARK»
 			}
 		'''
+		ret.replace("	", indent).replace("¥r¥n", "¥n").replace("¥r", "¥n")
 	}
 
 	/**
@@ -154,78 +161,37 @@ abstract class TestCodeGenerator {
 		// Append method definitions after field definitions
 		builder.append(
 			'''
-				private static Pattern commentPattern = Pattern.compile(\"<!--POGEN,([^,]*),([^,]*),(.*?)-->\", Pattern.DOTALL);
+				private static Pattern commentPattern = Pattern.compile("<!--POGEN,([^,]*),([^,]*),(.*?)-->", Pattern.DOTALL);
 			''')
 
-		val varNameCounter = HashMultiset.<String>create()
+		val varNames = Sets.<String>newHashSet()
 
-		templateInfo.getHtmlTagInfos().forEach [ tagInfo |
+		templateInfo.getHtmlTagInfos().filter [
+			it.hasParentTag()
+		].forEach [
 			// Skip this variable if it has no parent html tag
 			// TODO(kazuu): Deal with these variable with a more proper way
-			if (tagInfo.hasParentTag()) {
-				return
-			}
-			val attrValue = tagInfo.getAttributeValue()
-			val isRepeated = tagInfo.isRepeated
-			for (varInfo : tagInfo.getVariableInfos()) {
-
-				// When a template variable appears in multiple html tags, varIndex > 1 is satisfied
-				varNameCounter.add(varInfo.getName())
-				val varIndex = varNameCounter.count(varInfo.getName())
+			val attrValue = it.getAttributeValue()
+			val isRepeated = it.isRepeated
+			for (varInfo : it.getVariableInfos()) {
 				val varName = varInfo.getName()
-				val newVarName = varName + convertToString(varIndex)
+				val uniqueVarName = if (!varNames.contains(varName)) {
+						varName
+					} else {
+						(2 .. 1000).map[varName + it].findFirst[!varNames.contains(it)]
+					}
+				varNames += uniqueVarName
 
 				if (!isRepeated) {
-					builder.append(
-						'''
-							«findByAnnotationLeft»
-							private WebElement elementOf«newVarName»;
-							
-							public WebElement getElementOf«StringUtils.capitalize(newVarName)»() {
-								return elementOf«newVarName»;
-							}
-							«FOR attrName : varInfo.sortedAttributeNames»
-								
-								public String getAttributeOf«attrName»On«StringUtils.capitalize(newVarName)»() {
-									return elementOf«newVarName».getAttribute("«attrName»");
-								}
-							«ENDFOR»
-						''')
+					builder.append(getElementFieldAndMethod(attrValue, uniqueVarName))
+					builder.append(getAttributeMethod(attrValue, uniqueVarName, varInfo))
 				} else {
-					builder.append(
-						'''
-							«findByAnnotation»
-							private List<WebElement> elementsOf«newVarName»;
-							
-							public List<WebElement> getElementsOf«StringUtils.capitalize(newVarName)»() {
-								return elementsOf«newVarName»;
-							}
-							«FOR attrName : varInfo.sortedAttributeNames»
-								
-								public List<String> getAttributesOf«attrName»On«StringUtils.capitalize(newVarName)»() {
-									List<String> result = new ArrayList<String>();
-									for (WebElement e : elementsOf«newVarName») {
-										result.add(e.getAttribute("«attrName»"));
-									}
-									return result;
-								}
-							«ENDFOR»
-						''')
+					builder.append(getElementSetFieldAndMethod(attrValue, uniqueVarName))
+					builder.append(getAttributeSetMethod(attrValue, uniqueVarName, varInfo))
 				}
 
-				if (varIndex == 1) {
-					builder.append(
-						'''
-							public String getTextOf«StringUtils.capitalize(varName)» {
-								Matcher matcher = commentPattern.matcher(driver.getPageSource());
-								while (matcher.find()) {
-									if (matcher.group(1).equals(\"«attrValue»\") && matcher.group(2).equals(\"«varName»\")) {
-										return matcher.group(3);
-									}
-								}
-								return null;
-							}
-						''')
+				if (!varInfo.manipulableTag) {
+					builder.append(getTextMethod(uniqueVarName, attrValue, varName))
 				}
 			}
 		]
@@ -233,16 +199,63 @@ abstract class TestCodeGenerator {
 		return builder.toString
 	}
 
-	protected abstract def String getFindByAnnotation()
+	private def getElementFieldAndMethod(String attrValue, String newVarName) '''
+		
+		«getFindByAnnotation(attrValue)»
+		private WebElement «newVarName»;
+		
+		public WebElement getElementOf«StringUtils.capitalize(newVarName)»() {
+			return «newVarName»;
+		}
+	'''
 
-	/**
-	 * Converts the specified number to a string. Results an empty string if the number is 1.
-	 * 
-	 * @param number the number to be converted
-	 * 
-	 * @return an empty string if the specified number is 1, otherwise prefix + number
-	 */
-	private def convertToString(int number) {
-		return if (number == 1) "" else String.valueOf(number);
+	private def getAttributeMethod(String attrValue, String newVarName, VariableInfo varInfo) '''
+		«FOR attrName : varInfo.sortedAttributeNames»
+			
+			public String getAttributeOf«StringUtils.capitalize(attrName)»On«StringUtils.capitalize(newVarName)»() {
+				return «newVarName».getAttribute("«attrName»");
+			}
+		«ENDFOR»
+	'''
+
+	private def getElementSetFieldAndMethod(String attrValue, String newVarName) '''
+		
+		«getFindByAnnotation(attrValue)»
+		private List<WebElement> «newVarName»;
+		
+		public List<WebElement> getElementsOf«StringUtils.capitalize(newVarName)»() {
+			return «newVarName»;
+		}
+	'''
+
+	private def getAttributeSetMethod(String attrValue, String newVarName, VariableInfo varInfo) '''
+		«FOR attrName : varInfo.sortedAttributeNames»
+			
+			public List<String> getAttributesOf«StringUtils.capitalize(attrName)»On«StringUtils.capitalize(newVarName)»() {
+				List<String> result = new ArrayList<String>();
+				for (WebElement e : «newVarName») {
+					result.add(e.getAttribute("«attrName»"));
+				}
+				return result;
+			}
+		«ENDFOR»
+	'''
+
+	private def getTextMethod(String newVarName, String attrValue, String varName) '''
+		
+		public String getTextOf«StringUtils.capitalize(newVarName)»() {
+			Matcher matcher = commentPattern.matcher(driver.getPageSource());
+			while (matcher.find()) {
+				if (matcher.group(1).equals("«attrValue»") && matcher.group(2).equals("«varName»")) {
+					return matcher.group(3);
+				}
+			}
+			return null;
+		}
+	'''
+
+	private def String getFindByAnnotation(String attrValue) {
+		findByAnnotationHead + attrValue + findByAnnotationTail
 	}
+
 }
