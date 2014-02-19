@@ -12,12 +12,12 @@ class TestCodeGenerator {
 	/**
 	 * The string to indicate the start of generated fields and getter methods.
 	 */
-	val GENERATED_CODE_END_MARK = "/* -------------------- GENERATED CODE END -------------------- */"
+	public static val GENERATED_CODE_END_MARK = "/* -------------------- GENERATED CODE END -------------------- */"
 
 	/**
 	 * The string to indicate the end of generated fields and getter methods.
 	 */
-	val GENERATED_CODE_START_MARK = "/* ------------------- GENERATED CODE START ------------------- */"
+	public static val GENERATED_CODE_START_MARK = "/* ------------------- GENERATED CODE START ------------------- */"
 
 	/**
 	 * The indent string.
@@ -113,7 +113,7 @@ class TestCodeGenerator {
 				«GENERATED_CODE_END_MARK»
 			}
 		'''
-		ret.replace("	", indent).replace("¥r¥n", "¥n").replace("¥r", "¥n")
+		ret.replace("	", indent).replace("\r\n", "\n").replace("\n", newLine)
 	}
 
 	/**
@@ -138,7 +138,9 @@ class TestCodeGenerator {
 		}
 		builder.append(code.subSequence(0, startIndex + GENERATED_CODE_START_MARK.length()));
 		builder.append(newLine);
-		builder.append(getFieldsAndGetters(templateInfo));
+		builder.append(
+			getFieldsAndGetters(templateInfo).replace("	", indent).replace("\r\n", "\n").replace("\n", newLine)
+		);
 		builder.append(code.subSequence(endIndex, code.length()));
 		return builder.toString();
 	}
