@@ -33,8 +33,6 @@ import org.apache.commons.cli.ParseException;
  * Selenium2 (WebDriver). So it reduces testers task such as inserting id attributes and writing
  * test code.
  * 
- * Currently only soy templates are supported.
- * 
  * @author Kazunori Sakamoto
  */
 public class PageObjectGenerator {
@@ -69,12 +67,15 @@ public class PageObjectGenerator {
         .addOption(OptionBuilder
             .withDescription("Attribute name to be assigned in tagas containing template variables (default is 'id').")
             .hasArg()
+            .withLongOpt("attr")
             .create('a'))
         .addOption(OptionBuilder
             .withDescription("Print help for this command.")
+            .withLongOpt("help")
             .create('h'))
         .addOption(OptionBuilder
             .withDescription("Print processed files verbosely.")
+            .withLongOpt("verbose")
             .create('v'));
     // @formatter:on
 
@@ -86,28 +87,35 @@ public class PageObjectGenerator {
               .withDescription("Package name of generating skeleton test code.")
               .hasArg()
               .isRequired()
+              .withLongOpt("package")
               .create('p'))
           .addOption(OptionBuilder
               .withDescription("Output directory of generating skeleton test code.")
               .hasArg()
               .isRequired()
+              .withLongOpt("out")
               .create('o'))
           .addOption(OptionBuilder
-              .withDescription("Root input directory of html template files for generating a package structure of test code.")
+              .withDescription("Root input directory of html template files for analyzing the suffixes of the package name.")
               .hasArg()
               .isRequired()
+              .withLongOpt("in")
               .create('i'))
           .addOption(OptionBuilder
               .withDescription("Regex for finding html template files.")
               .hasArg()
+              .withLongOpt("regex")
               .create('e'))
           .addOption(OptionBuilder
               .withDescription("Option for finding html template files recursively.")
+              .withLongOpt("recursive")
               .create('r'));
       // @formatter:on
       helpMessage =
-          "java PageObjectGenerator generate -o <test_out_dir> -p <package_name>"
-              + " [OPTIONS] <template_file1> <template_file2> ...";
+          "java PageObjectGenerator generate -o <test_out_dir> -p <package_name> -i <root_directory> "
+              + " [OPTIONS] <template_file1> <template_file2> ...\n"
+              + "e.g. java PageObjectGenerator generate -a class -o PageObjectGeneratorTest/src/test/java/com/google/testing/pogen/pages"
+              + " -i PageObjectGeneratorTest/src/main/resources -p com.google.testing.pogen.pages -e (.*)\\.html -v";
     } else if (commandName.equals(MEASURE_COMMAND)) {
       helpMessage =
           "java PageObjectGenerator measure [OPTIONS] <template_file1> <template_file2> ...";

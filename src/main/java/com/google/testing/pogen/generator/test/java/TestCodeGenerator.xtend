@@ -20,6 +20,11 @@ class TestCodeGenerator {
 	public static val GENERATED_CODE_START_MARK = "/* ------------------- GENERATED CODE START ------------------- */"
 
 	/**
+	 * The string to split original names with numbers to make their names unique.
+	 */
+	public static val NUMBER_SPLITTER = "_PO"
+
+	/**
 	 * The indent string.
 	 */
 	val String indent;
@@ -81,7 +86,7 @@ class TestCodeGenerator {
 		Preconditions.checkNotNull(templateInfo);
 		Preconditions.checkNotNull(packageName);
 		Preconditions.checkNotNull(className);
-		val ret = '''
+		val code = '''
 			package «packageName»;
 			
 			import static org.junit.Assert.*;
@@ -113,7 +118,7 @@ class TestCodeGenerator {
 				«GENERATED_CODE_END_MARK»
 			}
 		'''
-		ret.replace("	", indent).replace("\r\n", "\n").replace("\n", newLine)
+		code.normalize()
 	}
 
 	/**
@@ -122,26 +127,31 @@ class TestCodeGenerator {
 	 * 
 	 * @param templateInfo the {@link TemplateInfo} of the template whose skeleton test code we want
 	 *	 	   to generate
-	 * @param code the existing test code
+	 * @param existingCode the existing test code
 	 * @return the updated skeleton test code
 	 * @throws PageObjectUpdateException if the existing test code doesn't have generated code
 	 */
-	def update(TemplateInfo templateInfo, String code) throws PageObjectUpdateException {
+	def update(TemplateInfo templateInfo, String existingCode) throws PageObjectUpdateException {
 		Preconditions.checkNotNull(templateInfo);
-		Preconditions.checkNotNull(code);
+		Preconditions.checkNotNull(existingCode);
 
 		val builder = new StringBuilder();
-		val startIndex = code.indexOf(GENERATED_CODE_START_MARK);
-		val endIndex = code.indexOf(GENERATED_CODE_END_MARK);
+		val startIndex = existingCode.indexOf(GENERATED_CODE_START_MARK);
+		var endIndex = existingCode.indexOf(GENERATED_CODE_END_MARK);
 		if (startIndex < 0 || endIndex < 0 || endIndex < startIndex) {
 			throw new PageObjectUpdateException("There are no proper start/end marks.");
 		}
-		builder.append(code.subSequence(0, startIndex + GENERATED_CODE_START_MARK.length()));
+		builder.append(existingCode.substring(0, startIndex + GENERATED_CODE_START_MARK.length()));
 		builder.append(newLine);
-		builder.append(
-			getFieldsAndGetters(templateInfo).replace("	", indent).replace("\r\n", "\n").replace("\n", newLine)
-		);
-		builder.append(code.subSequence(endIndex, code.length()));
+		val code = '''
+			
+				«getFieldsAndGetters(templateInfo)»
+		'''
+		builder.append(code.substring(code.indexOf('\t')).normalize());
+		while (existingCode.charAt(endIndex - 1) == ' ' || existingCode.charAt(endIndex - 1) == '\t') {
+			endIndex = endIndex - 1
+		}
+		builder.append(existingCode.substring(endIndex, existingCode.length()));
 		return builder.toString();
 	}
 
@@ -180,7 +190,7 @@ class TestCodeGenerator {
 				val uniqueVarName = if (!varNames.contains(varName)) {
 						varName
 					} else {
-						(2 .. 1000).map[varName + it].findFirst[!varNames.contains(it)]
+						(2 .. Integer.MAX_VALUE).map[varName + NUMBER_SPLITTER + it].findFirst[!varNames.contains(it)]
 					}
 				varNames += uniqueVarName
 
@@ -188,12 +198,16 @@ class TestCodeGenerator {
 					builder.append(getElementFieldAndMethod(attrValue, uniqueVarName))
 					builder.append(getAttributeMethod(attrValue, uniqueVarName, varInfo))
 				} else {
-					builder.append(getElementSetFieldAndMethod(attrValue, uniqueVarName))
-					builder.append(getAttributeSetMethod(attrValue, uniqueVarName, varInfo))
+					builder.append(getElementListFieldAndMethod(attrValue, uniqueVarName))
+					builder.append(getAttributeListMethod(attrValue, uniqueVarName, varInfo))
 				}
 
 				if (!varInfo.manipulableTag) {
-					builder.append(getTextMethod(uniqueVarName, attrValue, varName))
+					if (!isRepeated) {
+						builder.append(getTextMethod(uniqueVarName, attrValue, varName))
+					} else {
+						builder.append(getTextListMethod(uniqueVarName, attrValue, varName))
+					}
 				}
 			}
 		]
@@ -220,7 +234,7 @@ class TestCodeGenerator {
 		«ENDFOR»
 	'''
 
-	private def getElementSetFieldAndMethod(String attrValue, String newVarName) '''
+	private def getElementListFieldAndMethod(String attrValue, String newVarName) '''
 		
 		«getFindByAnnotation(attrValue)»
 		private List<WebElement> «newVarName»;
@@ -230,7 +244,7 @@ class TestCodeGenerator {
 		}
 	'''
 
-	private def getAttributeSetMethod(String attrValue, String newVarName, VariableInfo varInfo) '''
+	private def getAttributeListMethod(String attrValue, String newVarName, VariableInfo varInfo) '''
 		«FOR attrName : varInfo.sortedAttributeNames»
 			
 			public List<String> getAttributesOf«StringUtils.capitalize(attrName)»On«StringUtils.capitalize(newVarName)»() {
@@ -256,8 +270,26 @@ class TestCodeGenerator {
 		}
 	'''
 
+	private def getTextListMethod(String newVarName, String attrValue, String varName) '''
+		
+		public List<String> getTextsOf«StringUtils.capitalize(newVarName)»() {
+			List<String> result = new ArrayList<String>();
+			Matcher matcher = commentPattern.matcher(driver.getPageSource());
+			while (matcher.find()) {
+				if (matcher.group(1).equals("«attrValue»") && matcher.group(2).equals("«varName»")) {
+					result.add(matcher.group(3));
+				}
+			}
+			return result;
+		}
+	'''
+
 	private def String getFindByAnnotation(String attrValue) {
 		findByAnnotationHead + attrValue + findByAnnotationTail
+	}
+
+	private def normalize(String code) {
+		code.replace("	", indent).replace("\r\n", "\n").replace("\n", newLine)
 	}
 
 }

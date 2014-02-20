@@ -425,13 +425,13 @@ class TestCodeGeneratorWithClassAttributeTest {
 				}
 				
 				@FindBy(how = How.CSS, using = "._1")
-				private WebElement content12;
+				private WebElement content1_PO2;
 				
-				public WebElement getElementOfContent12() {
-					return content12;
+				public WebElement getElementOfContent1_PO2() {
+					return content1_PO2;
 				}
 				
-				public String getTextOfContent12() {
+				public String getTextOfContent1_PO2() {
 					Matcher matcher = commentPattern.matcher(driver.getPageSource());
 					while (matcher.find()) {
 						if (matcher.group(1).equals("_1") && matcher.group(2).equals("content1")) {
@@ -569,14 +569,15 @@ class TestCodeGeneratorWithClassAttributeTest {
 					return result;
 				}
 				
-				public String getTextOfUrl() {
+				public List<String> getTextsOfUrl() {
+					List<String> result = new ArrayList<String>();
 					Matcher matcher = commentPattern.matcher(driver.getPageSource());
 					while (matcher.find()) {
 						if (matcher.group(1).equals("_0") && matcher.group(2).equals("url")) {
-							return matcher.group(3);
+							result.add(matcher.group(3));
 						}
 					}
-					return null;
+					return result;
 				}
 			''').normalizeCode()
 
