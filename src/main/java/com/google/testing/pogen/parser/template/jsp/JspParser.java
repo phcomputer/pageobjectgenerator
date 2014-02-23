@@ -27,6 +27,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
 import com.google.testing.pogen.parser.template.HtmlTagInfo;
+import com.google.testing.pogen.parser.template.RegexVariableExtractor;
 import com.google.testing.pogen.parser.template.TemplateParseException;
 import com.google.testing.pogen.parser.template.TemplateParser;
 
@@ -57,11 +58,12 @@ public class JspParser extends TemplateParser {
   }
 
   @Override
-  protected List<HtmlTagInfo> parseTagsContainingVariables(String template)
-      throws TemplateParseException {
+  protected List<HtmlTagInfo> parseTagsContainingVariables(String template,
+      RangeSet<Integer> repeatedParts) throws TemplateParseException {
     Preconditions.checkNotNull(template);
-    JspVariableExtractor extractor =
-        new JspVariableExtractor(TreeRangeSet.<Integer>create(), attributeName);
+    RegexVariableExtractor extractor =
+        new RegexVariableExtractor(repeatedParts, TreeRangeSet.<Integer>create(), attributeName,
+            Pattern.compile("<%=\\s*(.*?)%>|\\$\\{([^{]*)\\}"));
     try {
       extractor.parse(new InputSource(new StringReader(template)));
     } catch (SAXException e) {

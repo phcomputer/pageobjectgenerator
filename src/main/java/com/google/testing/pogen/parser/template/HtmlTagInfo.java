@@ -23,6 +23,7 @@ import javax.annotation.Nullable;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import com.google.common.collect.RangeSet;
 
 /**
  * A class to contain the information of a html tag such as its location, its assigned attribute
@@ -59,6 +60,10 @@ public class HtmlTagInfo {
    * A name attribute value in this html tag.
    */
   private String nameValue;
+  /**
+   * A boolean value whether this tag appears in a repeated part.
+   */
+  private final boolean isRepeated;
 
   /**
    * Constructs an instance with the assigned attribute value, the specified start and the specified
@@ -68,15 +73,19 @@ public class HtmlTagInfo {
    * @param attributeValue the assigned attribute value of this tag
    * @param startIndex the start position of this tag
    * @param endIndex the end position of this tag
+   * @param repeatedParts the {@link RangeSet} of the positions of repeated parts
    */
-  public HtmlTagInfo(@Nullable String attributeValue, int startIndex, int endIndex) {
+  public HtmlTagInfo(@Nullable String attributeValue, int startIndex, int endIndex,
+      RangeSet<Integer> repeatedRanges) {
     Preconditions.checkArgument(startIndex >= -1);
     Preconditions.checkArgument(endIndex >= -1);
+    Preconditions.checkNotNull(repeatedRanges);
 
     this.attributeValue = attributeValue;
     this.startIndex = startIndex;
     this.endIndex = endIndex;
     this.variables = Maps.newHashMap();
+    this.isRepeated = repeatedRanges.contains(startIndex);
   }
 
   /**
@@ -216,5 +225,9 @@ public class HtmlTagInfo {
 
   public void setNameValue(String nameValue) {
     this.nameValue = nameValue;
+  }
+
+  public boolean isRepeated() {
+    return isRepeated;
   }
 }

@@ -22,6 +22,7 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.RangeSet;
+import com.google.common.collect.TreeRangeSet;
 
 /**
  * A utility class for parser tests.
@@ -38,7 +39,8 @@ public class ParserTestUtil {
 
   public static List<String> getCommandsInRanges(TemplateParser parser, String template,
       @Nullable RangeSet<Integer> ranges) throws TemplateParseException {
-    List<HtmlTagInfo> tags = parser.parseTagsContainingVariables(template);
+    List<HtmlTagInfo> tags =
+        parser.parseTagsContainingVariables(template, TreeRangeSet.<Integer>create());
     List<String> commands = Lists.newArrayList();
     for (HtmlTagInfo tag : tags) {
       for (VariableInfo var : tag.getVariableInfos()) {

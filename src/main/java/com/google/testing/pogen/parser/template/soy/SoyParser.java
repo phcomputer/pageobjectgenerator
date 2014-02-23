@@ -28,6 +28,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 import com.google.testing.pogen.parser.template.HtmlTagInfo;
+import com.google.testing.pogen.parser.template.RegexVariableExtractor;
 import com.google.testing.pogen.parser.template.StringWithIndex;
 import com.google.testing.pogen.parser.template.TemplateParseException;
 import com.google.testing.pogen.parser.template.TemplateParser;
@@ -80,15 +81,17 @@ public class SoyParser extends TemplateParser {
   }
 
   @Override
-  protected List<HtmlTagInfo> parseTagsContainingVariables(String template)
-      throws TemplateParseException {
+  protected List<HtmlTagInfo> parseTagsContainingVariables(String template,
+      RangeSet<Integer> repeatedParts) throws TemplateParseException {
     Preconditions.checkNotNull(template);
     // Exclude template variables in call parameters.
     // E.g. about {call .t1}{paramarg1}{$p1}{/param}{/call}, $p1 isn't targeted.
     // Because parameters should be tested in the callee side.
     RangeSet<Integer> excludedPart =
         getIndexRangesOfNonNestedTags(template, CALL_START_PATTERN, CALL_END_PATTERN);
-    SoyVariableExtractor extractor = new SoyVariableExtractor(excludedPart, attributeName);
+    RegexVariableExtractor extractor =
+        new RegexVariableExtractor(repeatedParts, excludedPart, attributeName,
+            Pattern.compile("\\{\\$([^{|]*)(|[^{]*)?\\}"));
     try {
       extractor.parse(new InputSource(new StringReader(template)));
     } catch (SAXException e) {

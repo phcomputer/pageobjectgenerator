@@ -37,3 +37,6 @@ download
 .classpath
 .project
 *.swp
+
+# Xtend
+xtend-gen

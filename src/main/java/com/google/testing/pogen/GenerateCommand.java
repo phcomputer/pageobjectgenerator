@@ -36,7 +36,6 @@ import com.google.testing.pogen.generator.template.TemplateUpdaters;
 import com.google.testing.pogen.generator.test.PageObjectUpdateException;
 import com.google.testing.pogen.generator.test.java.NameConverter;
 import com.google.testing.pogen.generator.test.java.TestCodeGenerator;
-import com.google.testing.pogen.generator.test.java.TestCodeGenerators;
 import com.google.testing.pogen.parser.template.TemplateInfo;
 import com.google.testing.pogen.parser.template.TemplateParseException;
 import com.google.testing.pogen.parser.template.TemplateParser;
@@ -142,21 +141,23 @@ public class GenerateCommand extends Command {
       System.err.println("Already exists: " + newAbstractPageFile.getAbsolutePath() + ".");
     }
 
-    // Collect the template files from the arguments indicating paths of template files
+    // Collect the template files from the arguments indicating paths of
+    // template files
     ArrayList<File> templateFiles = new ArrayList<File>();
     for (String templatePath : templatePaths) {
       File file = createFileFromFilePath(templatePath);
       templateFiles.add(file);
     }
 
-    // Collect the template files from the specified pattern with the root directory
+    // Collect the template files from the specified pattern with the root
+    // directory
     if (!Strings.isNullOrEmpty(templateFilePattern)) {
       templateFiles.addAll(FileUtils.listFiles(rootInputDir, new RegexFileFilter(
           templateFilePattern), isRecusive ? FileFilterUtils.trueFileFilter() : null));
     }
 
     TemplateUpdater updater = TemplateUpdaters.getPreferredUpdater(attributeName);
-    TestCodeGenerator generator = TestCodeGenerators.getPreferredGenerator(attributeName);
+    TestCodeGenerator generator = new TestCodeGenerator(attributeName);
     for (File file : templateFiles) {
       checkExistenceAndPermission(file, true, true);
       try {
@@ -218,13 +219,15 @@ public class GenerateCommand extends Command {
     // Construct path of skeleton test code
     URI relativeDirUri = rootInputDir.toURI().relativize(templateFile.getParentFile().toURI());
     String relativeDirPath = relativeDirUri.toString();
-    if (relativeDirPath.endsWith("/")) {
+    if (relativeDirPath.endsWith(File.separator) || relativeDirPath.endsWith("/")
+        || relativeDirPath.endsWith("\\")) {
       relativeDirPath = relativeDirPath.substring(0, relativeDirPath.length() - 1);
     }
     if (!Strings.isNullOrEmpty(relativeDirPath)) {
       relativeDirPath = File.separatorChar + relativeDirPath;
     }
-    String packagePrefix = relativeDirPath.replace('/', '.');
+    String packageSuffix =
+        relativeDirPath.replace(File.separatorChar, '.').replace('/', '.').replace('\\', '.');
     File actualDir = new File(codeOutDir.getPath() + relativeDirPath);
     actualDir.mkdirs();
 
@@ -237,7 +240,7 @@ public class GenerateCommand extends Command {
     // @formatter:off
     String testCode = codeFile.exists()
         ? generator.update(templateInfo, Files.toString(codeFile, Charset.defaultCharset()))
-        : generator.generate(templateInfo, packageName + packagePrefix, pageName);
+        : generator.generate(templateInfo, packageName + packageSuffix, pageName);
     // @formatter:on
     if (verbose) {
       System.out.print(".");

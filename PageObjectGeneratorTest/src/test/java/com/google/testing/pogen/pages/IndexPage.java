@@ -20,26 +20,21 @@ public class IndexPage extends AbstractPage {
     super(driver);
     assertInvariant();
   }
-
+  
   private void assertInvariant() {
   }
-
+  
   /* ------------------- GENERATED CODE START ------------------- */
-  private static Pattern commentPattern = Pattern.compile("<!--POGEN,([^,]*),([^,]*),(.*?)-->");
-  @FindBy(how = How.XPATH, using = "//*[@lang='__pogen_0']")
+  private static Pattern commentPattern = Pattern.compile("<!--POGEN,([^,]*),([^,]*),(.*?)-->", Pattern.DOTALL);
+  
+  @FindBy(how = How.CSS, using = ".__pogen_0")
   private WebElement title;
-  @FindBy(how = How.XPATH, using = "//*[@lang='__pogen_1']")
-  private WebElement value;
-  @FindBy(how = How.XPATH, using = "//*[@lang='__pogen_2']")
-  private WebElement value2;
-  @FindBy(how = How.XPATH, using = "//*[@lang='test3']")
-  private WebElement value3;
-
-  public WebElement getElementForTitle() {
+  
+  public WebElement getElementOfTitle() {
     return title;
   }
-
-  public String getTextForTitle() {
+  
+  public String getTextOfTitle() {
     Matcher matcher = commentPattern.matcher(driver.getPageSource());
     while (matcher.find()) {
       if (matcher.group(1).equals("__pogen_0") && matcher.group(2).equals("title")) {
@@ -48,12 +43,15 @@ public class IndexPage extends AbstractPage {
     }
     return null;
   }
-
-  public WebElement getElementForValue() {
+  
+  @FindBy(how = How.CSS, using = ".__pogen_1")
+  private WebElement value;
+  
+  public WebElement getElementOfValue() {
     return value;
   }
-
-  public String getTextForValue() {
+  
+  public String getTextOfValue() {
     Matcher matcher = commentPattern.matcher(driver.getPageSource());
     while (matcher.find()) {
       if (matcher.group(1).equals("__pogen_1") && matcher.group(2).equals("value")) {
@@ -62,12 +60,15 @@ public class IndexPage extends AbstractPage {
     }
     return null;
   }
-
-  public WebElement getElementForValue2() {
+  
+  @FindBy(how = How.CSS, using = ".__pogen_2")
+  private WebElement value2;
+  
+  public WebElement getElementOfValue2() {
     return value2;
   }
-
-  public String getTextForValue2() {
+  
+  public String getTextOfValue2() {
     Matcher matcher = commentPattern.matcher(driver.getPageSource());
     while (matcher.find()) {
       if (matcher.group(1).equals("__pogen_2") && matcher.group(2).equals("value2")) {
@@ -76,38 +77,57 @@ public class IndexPage extends AbstractPage {
     }
     return null;
   }
-
-  public WebElement getElementForValue3() {
-    return value3;
+  
+  @FindBy(how = How.CSS, using = ".__pogen_3")
+  private WebElement value_PO2;
+  
+  public WebElement getElementOfValue_PO2() {
+    return value_PO2;
   }
-
-  public String getTextForValue3() {
+  
+  public String getTextOfValue_PO2() {
     Matcher matcher = commentPattern.matcher(driver.getPageSource());
     while (matcher.find()) {
-      if (matcher.group(1).equals("test3") && matcher.group(2).equals("value3")) {
+      if (matcher.group(1).equals("__pogen_3") && matcher.group(2).equals("value")) {
         return matcher.group(3);
       }
     }
     return null;
   }
-
-  public List<WebElement> getElementsForValue4() {
-    List<WebElement> result = new ArrayList<WebElement>();
-    for (WebElement e : driver.findElements(By.xpath("//*[@lang='__pogen_3']"))) {
-      result.add(e);
-    }
-    return result;
+  
+  @FindBy(how = How.CSS, using = ".__pogen_4")
+  private WebElement value3;
+  
+  public WebElement getElementOfValue3() {
+    return value3;
   }
-
-  public List<String> getTextsForValue4() {
+  
+  public String getTextOfValue3() {
+    Matcher matcher = commentPattern.matcher(driver.getPageSource());
+    while (matcher.find()) {
+      if (matcher.group(1).equals("__pogen_4") && matcher.group(2).equals("value3")) {
+        return matcher.group(3);
+      }
+    }
+    return null;
+  }
+  
+  @FindBy(how = How.CSS, using = ".__pogen_5")
+  private List<WebElement> value4;
+  
+  public List<WebElement> getElementsOfValue4() {
+    return value4;
+  }
+  
+  public List<String> getTextsOfValue4() {
     List<String> result = new ArrayList<String>();
     Matcher matcher = commentPattern.matcher(driver.getPageSource());
     while (matcher.find()) {
-      if (matcher.group(1).equals("__pogen_3") && matcher.group(2).equals("value4")) {
+      if (matcher.group(1).equals("__pogen_5") && matcher.group(2).equals("value4")) {
         result.add(matcher.group(3));
       }
     }
     return result;
   }
-  /* -------------------- GENERATED CODE END -------------------- */
+/* -------------------- GENERATED CODE END -------------------- */
 }
