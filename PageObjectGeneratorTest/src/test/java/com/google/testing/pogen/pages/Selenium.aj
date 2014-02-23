@@ -21,7 +21,7 @@ aspect Selenium {
   }
 
   before(WebDriver selenium, By locator): usingLocator(selenium, locator) {
-    print(selenium, locator, thisJoinPoint.getSignature().getName());
+    //print(selenium, locator, thisJoinPoint.getSignature().getName());
   }
 
   private void print(WebDriver selenium, By locator, String methodName) {
