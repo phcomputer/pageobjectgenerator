@@ -1,0 +1,3 @@
+Generates skeleton test code for WebDriver from html template files.
+
+WebDriver is the famous end-to-end test solution for Web applications. PageObject pattern is officially suggested to write readable WebDriver tests. Also, template systems are widely used to create Web applications. templates have information about dynamic/static part in the HTML. Using such information, this tool generates PageObject codes from templates.
